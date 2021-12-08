@@ -30,6 +30,7 @@ int main(int argc,char * argv[])
 	/* Note: Most error checking omitted for simplicity */
 
 	rc = mdb_env_create(&env);
+    printf("env created\n");
 	rc = mdb_env_open(env, "./testdb", 0, 0664);
 	rc = mdb_txn_begin(env, NULL, 0, &txn);
 	rc = mdb_dbi_open(txn, NULL, 0, &dbi);

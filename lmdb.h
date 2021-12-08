@@ -1172,18 +1172,18 @@ int  mdb_txn_renew(MDB_txn *txn);
 	 */
 int  mdb_dbi_open(MDB_txn *txn, const char *name, unsigned int flags, MDB_dbi *dbi);
 
-	/** @brief Retrieve statistics for a database.
-	 *
-	 * @param[in] txn A transaction handle returned by #mdb_txn_begin()
-	 * @param[in] dbi A database handle returned by #mdb_dbi_open()
-	 * @param[out] stat The address of an #MDB_stat structure
-	 * 	where the statistics will be copied
-	 * @return A non-zero error value on failure and 0 on success. Some possible
-	 * errors are:
-	 * <ul>
-	 *	<li>EINVAL - an invalid parameter was specified.
-	 * </ul>
-	 */
+/** @brief Retrieve statistics for a database.
+ *
+ * @param[in] txn A transaction handle returned by #mdb_txn_begin()
+ * @param[in] dbi A database handle returned by #mdb_dbi_open()
+ * @param[out] stat The address of an #MDB_stat structure
+ * 	where the statistics will be copied
+ * @return A non-zero error value on failure and 0 on success. Some possible
+ * errors are:
+ * <ul>
+ *	<li>EINVAL - an invalid parameter was specified.
+ * </ul>
+ */
 int  mdb_stat(MDB_txn *txn, MDB_dbi dbi, MDB_stat *stat);
 
 	/** @brief Retrieve the DB flags for a database handle.

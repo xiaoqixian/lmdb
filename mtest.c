@@ -50,7 +50,7 @@ int main(int argc,char * argv[])
 		E(mdb_env_open(env, "./testdb", MDB_FIXEDMAP /*|MDB_NOSYNC*/, 0664));
 
 		E(mdb_txn_begin(env, NULL, 0, &txn));
-		E(mdb_dbi_open(txn, NULL, 0, &dbi));
+		E(mdb_dbi_open(txn, NULL, 0, &dbi)); //a handle for an individual database in the DB environment.
    
 		key.mv_size = sizeof(int);
 		key.mv_data = sval;
