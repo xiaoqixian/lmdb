@@ -61,6 +61,10 @@ test:	all
 	rm -rf testdb && mkdir testdb
 	./mtest && ./mdb_stat testdb
 
+test7: all
+	rm -rf testdb && mkdir testdb
+	./mtest7 && ./mdb_stat testdb
+
 liblmdb.a:	mdb.o midl.o
 	$(AR) rs $@ mdb.o midl.o
 
@@ -79,6 +83,7 @@ mtest3:	mtest3.o liblmdb.a
 mtest4:	mtest4.o liblmdb.a
 mtest5:	mtest5.o liblmdb.a
 mtest6:	mtest6.o liblmdb.a
+mtest7: mtest7.o liblmdb.a
 
 mdb.o: mdb.c lmdb.h midl.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c mdb.c

@@ -671,7 +671,7 @@ static txnid_t mdb_debug_start;
 	 */
 #define DPRINTF(args) ((void) ((mdb_debug) && DPRINTF0 args))
 #define DPRINTF0(fmt, ...) \
-	fprintf(stderr, "%s:%d " fmt "\n", mdb_func_, __LINE__, __VA_ARGS__)
+	fprintf(stderr, "\033[0;33m [DEBUG]\033[0m %s:%d " fmt "\n", mdb_func_, __LINE__, __VA_ARGS__)
 #else /*MDB_DEBUG*/
 #define DPRINTF(args)	((void) 0)
 #endif /*MDB_DEBUG*/
@@ -1482,7 +1482,7 @@ struct MDB_xcursor;
 
 	/** Cursors are used for all DB operations.
 	 *	A cursor holds a path of (page pointer, key index) from the DB
-	 *	root to a position in the DB, plus other state. #MDB_DUPSORT
+	 *	root to a position in the DB, plus other state. MDB_DUPSORT
 	 *	cursors include an xcursor to the current data item. Write txns
 	 *	track their cursors and keep them up to date when data moves.
 	 *	Exception: An xcursor's pointer to a #P_SUBP page can be stale.
@@ -5831,9 +5831,7 @@ fail:
 #endif /*VALID_FLAGS & PERSISTENT_FLAGS & (CHANGEABLE|CHANGELESS)*/
 
 
-int ESECT
-mdb_env_open(MDB_env *env, const char *path, unsigned int flags, mdb_mode_t mode)
-{
+int ESECT mdb_env_open(MDB_env *env, const char *path, unsigned int flags, mdb_mode_t mode) {
 	int rc, excl = -1;
 	MDB_name fname;
 
@@ -6198,9 +6196,7 @@ mdb_cmp_long(const MDB_val *a, const MDB_val *b)
  *	This is also set as #MDB_INTEGERDUP|#MDB_DUPFIXED's #MDB_dbx.%md_dcmp,
  *	but #mdb_cmp_clong() is called instead if the data type is #mdb_size_t.
  */
-static int
-mdb_cmp_int(const MDB_val *a, const MDB_val *b)
-{
+static int mdb_cmp_int(const MDB_val *a, const MDB_val *b) {
 	return (*(unsigned int *)a->mv_data < *(unsigned int *)b->mv_data) ? -1 :
 		*(unsigned int *)a->mv_data > *(unsigned int *)b->mv_data;
 }
@@ -6208,9 +6204,8 @@ mdb_cmp_int(const MDB_val *a, const MDB_val *b)
 /** Compare two items pointing at unsigned ints of unknown alignment.
  *	Nodes and keys are guaranteed to be 2-byte aligned.
  */
-static int
-mdb_cmp_cint(const MDB_val *a, const MDB_val *b)
-{
+static int mdb_cmp_cint(const MDB_val *a, const MDB_val *b) {
+    DPRINTF(("calling mdb_cmp function with mdb_cmp_cint"));
 #if BYTE_ORDER == LITTLE_ENDIAN
 	unsigned short *u, *c;
 	int x;
@@ -6237,9 +6232,8 @@ mdb_cmp_cint(const MDB_val *a, const MDB_val *b)
 }
 
 /** Compare two items lexically */
-static int
-mdb_cmp_memn(const MDB_val *a, const MDB_val *b)
-{
+static int mdb_cmp_memn(const MDB_val *a, const MDB_val *b) {
+    DPRINTF(("calling mdb_cmp function with mdb_cmp_memn"));
 	int diff;
 	ssize_t len_diff;
 	unsigned int len;
@@ -6256,9 +6250,8 @@ mdb_cmp_memn(const MDB_val *a, const MDB_val *b)
 }
 
 /** Compare two items in reverse byte order */
-static int
-mdb_cmp_memnr(const MDB_val *a, const MDB_val *b)
-{
+static int mdb_cmp_memnr(const MDB_val *a, const MDB_val *b) {
+    DPRINTF(("calling mdb_cmp function with mdb_cmp_memnr"));
 	const unsigned char	*p1, *p2, *p1_lim;
 	ssize_t len_diff;
 	int diff;
@@ -7397,10 +7390,7 @@ mdb_cursor_prev(MDB_cursor *mc, MDB_val *key, MDB_val *data, MDB_cursor_op op)
 }
 
 /** Set the cursor on a specific data item. */
-static int
-mdb_cursor_set(MDB_cursor *mc, MDB_val *key, MDB_val *data,
-    MDB_cursor_op op, int *exactp)
-{
+static int mdb_cursor_set(MDB_cursor *mc, MDB_val *key, MDB_val *data, MDB_cursor_op op, int *exactp) {
 	int		 rc;
 	MDB_page	*mp;
 	MDB_node	*leaf = NULL;
@@ -7642,9 +7632,7 @@ mdb_cursor_first(MDB_cursor *mc, MDB_val *key, MDB_val *data)
 }
 
 /** Move the cursor to the last item in the database. */
-static int
-mdb_cursor_last(MDB_cursor *mc, MDB_val *key, MDB_val *data)
-{
+static int mdb_cursor_last(MDB_cursor *mc, MDB_val *key, MDB_val *data) {
 	int		 rc;
 	MDB_node	*leaf;
 
@@ -7907,10 +7895,15 @@ mdb_cursor_touch(MDB_cursor *mc)
 /** Do not spill pages to disk if txn is getting full, may fail instead */
 #define MDB_NOSPILL	0x8000
 
-int
-mdb_cursor_put(MDB_cursor *mc, MDB_val *key, MDB_val *data,
-    unsigned int flags)
-{
+
+/*
+ * flags:
+ *   MDB_MULTIPLE: store multiple contaguous elements in a single request. The data 
+ *   argument must be an array of two MDB_vals. To work with this flag, the db must 
+ *   be opened with MDB_DUPFIXED.
+ *
+ */
+int mdb_cursor_put(MDB_cursor *mc, MDB_val *key, MDB_val *data, unsigned int flags) {
 	MDB_env		*env;
 	MDB_node	*leaf = NULL;
 	MDB_page	*fp, *mp, *sub_root = NULL;
@@ -7940,7 +7933,7 @@ mdb_cursor_put(MDB_cursor *mc, MDB_val *key, MDB_val *data,
 	}
 
 	nospill = flags & MDB_NOSPILL;
-	flags &= ~MDB_NOSPILL;
+	flags &= ~MDB_NOSPILL; //remove MDB_NOSPILL from flags.
 
 	if (mc->mc_txn->mt_flags & (MDB_TXN_RDONLY|MDB_TXN_BLOCKED))
 		return (mc->mc_txn->mt_flags & MDB_TXN_RDONLY) ? EACCES : MDB_BAD_TXN;
@@ -7962,20 +7955,20 @@ mdb_cursor_put(MDB_cursor *mc, MDB_val *key, MDB_val *data,
 
 	dkey.mv_size = 0;
 
-	if (flags & MDB_CURRENT) {
-		if (!(mc->mc_flags & C_INITIALIZED))
+	if (flags & MDB_CURRENT) { //if MDB_CURRENT, overrite the current  key/data pair.
+		if (!(mc->mc_flags & C_INITIALIZED)) //the cursor has to be initialized.
 			return EINVAL;
 		rc = MDB_SUCCESS;
 	} else if (mc->mc_db->md_root == P_INVALID) {
 		/* new database, cursor has nothing to point to */
-		mc->mc_snum = 0;
-		mc->mc_top = 0;
+		mc->mc_snum = 0;//number of pushed pages.
+		mc->mc_top = 0;//index of top page, normally mc_snum-1
 		mc->mc_flags &= ~C_INITIALIZED;
 		rc = MDB_NO_ROOT;
 	} else {
 		int exact = 0;
 		MDB_val d2;
-		if (flags & MDB_APPEND) {
+		if (flags & MDB_APPEND) {//data is being appended, don't split full pages.
 			MDB_val k2;
 			rc = mdb_cursor_last(mc, &k2, &d2);
 			if (rc == 0) {
@@ -8435,9 +8428,7 @@ bad_sub:
 	return rc;
 }
 
-int
-mdb_cursor_del(MDB_cursor *mc, unsigned int flags)
-{
+int mdb_cursor_del(MDB_cursor *mc, unsigned int flags) {
 	MDB_node	*leaf;
 	MDB_page	*mp;
 	int rc;
@@ -8975,9 +8966,7 @@ mdb_xcursor_init2(MDB_cursor *mc, MDB_xcursor *src_mx, int new_dupdata)
 }
 
 /** Initialize a cursor for a given transaction and database. */
-static void
-mdb_cursor_init(MDB_cursor *mc, MDB_txn *txn, MDB_dbi dbi, MDB_xcursor *mx)
-{
+static void mdb_cursor_init(MDB_cursor *mc, MDB_txn *txn, MDB_dbi dbi, MDB_xcursor *mx) {
 	mc->mc_next = NULL;
 	mc->mc_backup = NULL;
 	mc->mc_dbi = dbi;
@@ -10410,7 +10399,7 @@ int mdb_put(MDB_txn *txn, MDB_dbi dbi, MDB_val *key, MDB_val *data, unsigned int
 		return (txn->mt_flags & MDB_TXN_RDONLY) ? EACCES : MDB_BAD_TXN;
 
 	mdb_cursor_init(&mc, txn, dbi, &mx);
-	mc.mc_next = txn->mt_cursors[dbi];
+	mc.mc_next = txn->mt_cursors[dbi]; //linked list
 	txn->mt_cursors[dbi] = &mc;
 	rc = mdb_cursor_put(&mc, key, data, flags);
 	txn->mt_cursors[dbi] = mc.mc_next;
@@ -11189,7 +11178,11 @@ int mdb_dbi_open(MDB_txn *txn, const char *name, unsigned int flags, MDB_dbi *db
 	if (!unused && txn->mt_numdbs >= txn->mt_env->me_maxdbs)
 		return MDB_DBS_FULL;
 
-	/* Cannot mix named databases with some mainDB flags */
+	/* Cannot mix named databases with some mainDB flags 
+     * MDB_DUPSORT: keys may have multiple values items, stored in sorted order.
+     * MDB_INTEGERKEY: keys are binary integer in native byte order, by default, 
+     * keys are treated as strings and compared from beginning to end.
+     * */
 	if (txn->mt_dbs[MAIN_DBI].md_flags & (MDB_DUPSORT|MDB_INTEGERKEY))
 		return (flags & MDB_CREATE) ? MDB_INCOMPATIBLE : MDB_NOTFOUND;
 
