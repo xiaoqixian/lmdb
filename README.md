@@ -65,6 +65,20 @@ If get the right node, if there is no enough space left for a new leaf node, the
 
 After all above work, if the return code is not `MDB_SUCCESS`, then the transaction has an error. Any transaction with error won't be committed.
 
+##### `mdb_txn_commit`
+
+Constraints of committable transactions:
+
+- Can't be read only
+- Must be the current write transaction recorded in the environment struct.
+- Must not have errors
+
+Any violation causes the transaction aborted.
+
+All write transactions carries a dirty queue, every time make changes to a page, if the page is not dirty, then the clean page is replaced with a new dirty page. After then the changes will be made to the page, so the original pages will always keep clean in a transaction. All dirty pages will be appended to the dirty queue when they are allocated. 
+
+So when commit a transaction, all dirty pages are written back to disk. LMDB uses iovec to support multiple writing sources. Page write back address is identified by page number.
+
 ##### `mdb_search_page_root`
 
 `mdb_search_page`  searches a page by a key, but `mdb_search_page` is just a wrapper of `mdb_search_page_root`.
