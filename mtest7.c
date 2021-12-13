@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "lmdb.h"
+#include "mdb.h"
 
 #define E(expr) CHECK((rc = (expr)) == MDB_SUCCESS, #expr)
 #define RES(err, expr) ((rc = expr) == (err) || (CHECK(!rc, #expr), 0))
@@ -21,59 +21,44 @@
 int main() {
 	int i = 0, j = 0, rc;
 	MDB_env *env;
-	MDB_dbi dbi;
+	MDB_db *db;
 	MDB_val key, data;
 	MDB_txn *txn;
-	MDB_stat mst;
+	MDB_stat *mst;
 	MDB_cursor *cursor, *cur2;
-	MDB_cursor_op op;
 	int count;
 	int *values;
-	char sval[32] = "";
 
-	srand(time(NULL));
+	srandom(time(NULL));
 
-    count = (rand()%384) + 64;
-    values = (int *)malloc(count*sizeof(int));
+	    count = (random()%384) + 64;
+	    values = (int *)malloc(count*sizeof(int));
 
-    for(i = 0;i<count;i++) {
-        values[i] = rand()%1024;
-    }
-
-    E(mdb_env_create(&env));
-    printf("DB environment created\n");
+		/*for(i = 0;i<count;i++) {*/
+			/*values[i] = random()%1024;*/
+		/*}*/
+        values[0] = 5000;
+        char key_val[32];
+        char data_val[32];
+        sprintf(key_val, "key of %d foo bar", values[0]);
+        sprintf(data_val, "data of %d foo bar", values[0]);
     
-    E(mdb_env_set_maxreaders(env, 1));
-    printf("set maxreaders as 1\n");
+		rc = mdbenv_create(&env);
+		rc = mdbenv_set_mapsize(env, 10485760);
+		rc = mdbenv_open(env, "./testdb", MDB_FIXEDMAP|MDB_NOSYNC, 0664);
+        rc = mdb_txn_begin(env, 0, &txn);
+        rc = mdb_open(env, txn, NULL, 0, &db);
+   
+        key.mv_size = sizeof(key_val);
+        key.mv_data = key_val;
+        data.mv_size = sizeof(data_val);
+        data.mv_data = data_val;
 
-    E(mdb_env_set_mapsize(env, 10485760));
-    E(mdb_env_open(env, "./testdb", MDB_FIXEDMAP /*|MDB_NOSYNC*/, 0664));
-    printf("open an environement\n");
-
-    E(mdb_txn_begin(env, NULL, 0, &txn));
-    printf("begin a transaction\n");
-
-    E(mdb_dbi_open(txn, NULL, 0, &dbi));
-    printf("open a database\n");
-
-    key.mv_size = sizeof(int);
-    key.mv_data = sval;
-    
-    sprintf(sval, "%03x %d foo bar", values[0], values[0]);
-    data.mv_size = sizeof(sval);
-    data.mv_data = sval;
-    
-    if (RES(MDB_KEYEXIST, mdb_put(txn, dbi, &key, &data, MDB_NOOVERWRITE))) {
-        data.mv_size = sizeof(sval);
-        data.mv_data = sval;
-    }
-    printf("put a key-value pair into the db\n");
-
-    E(mdb_txn_commit(txn));
-    printf("commit a transaction\n");
-    E(mdb_env_stat(env, &mst));
-
-    mdb_dbi_close(env, dbi);
-    mdb_env_close(env);
-    return 0;
+        mdb_put(db, txn, &key, &data, MDB_NOOVERWRITE);
+        rc = mdb_txn_commit(txn);
+        mdb_cursor_open(db, NULL, &cursor);
+        mdb_cursor_get(cursor, &key, &data, MDB_NEXT);
+        printf("key: %.*s, data: %.*s\n", key.mv_size, key.mv_data, data.mv_size, data.mv_data);
+		mdb_close(db);
+		mdbenv_close(env);
 }

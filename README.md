@@ -79,6 +79,8 @@ All write transactions carries a dirty queue, every time make changes to a page,
 
 So when commit a transaction, all dirty pages are written back to disk. LMDB uses iovec to support multiple writing sources. Page write back address is identified by page number.
 
+After all dirty pages have been written back, the `fsync` function is called to synchronize file contents to memory. 
+
 ##### `mdb_search_page_root`
 
 `mdb_search_page`  searches a page by a key, but `mdb_search_page` is just a wrapper of `mdb_search_page_root`.
@@ -120,4 +122,6 @@ typedef struct MDB_page {		/* represents a page of storage */
 A page is considered as a continuous logical memory space with a lower address and a upper address. An pointer array is stored in the page that increases from bottom to top, and that is `mp_ptrs` in `MDB_page`. `mp_ptrs` stores all pointers to key/value pairs stored in the same page, so users can quickly get a key/value pair by index. And the pointers stored in this array are sorted by key. So every time a new key/value pair inserted into the page, all pointers respond to the keys that are greater than the key inserted into have to be readjusted. 
 
 Oppositely, all key/value pairs are stored from top to bottom, between `mp_ptrs` and key/value pairs are the free space, maintained by two variables: `pb_lower` and `pb_upper`. If the page passed in is a branch, then the `data` parameter is actually the child page number. Else if the page is a leaf, the `data` is the real data. 
+
+#### Cursor
 
