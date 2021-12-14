@@ -125,3 +125,48 @@ Oppositely, all key/value pairs are stored from top to bottom, between `mp_ptrs`
 
 #### Cursor
 
+LMDB uses cursor to search and scan. 
+
+```c
+struct MDB_cursor {
+	MDB_db		*mc_db;
+	MDB_txn		*mc_txn;
+	struct page_stack	 mc_stack;		/* stack of parent pages */
+	short		mc_initialized;	/* 1 if initialized */
+	short		mc_eof;		/* 1 if end is reached */
+};
+```
+
+`mc_stack` is stack of type `struct MDB_ppage` to record all page pointers and additional information of pages along the way when a cursor walks through the tree until reaches a leaf. 
+
+```c
+typedef struct MDB_ppage {					/* ordered list of pages */
+	SLIST_ENTRY(MDB_ppage)	 mp_entry;
+	MDB_page		*mp_page;
+	unsigned int	mp_ki;		/* cursor index on page */
+} MDB_ppage;
+SLIST_HEAD(page_stack, MDB_ppage);
+```
+
+When a cursor is at a leaf page, the top of `mc_stack` is the leaf page, the next if the leaf page's parent, and the next of next is the leaf page's parent's parent, and so on. 
+
+The stack is the key to how a cursor achieves **depth-first-search**. For instance, when a cursor is at leaf page, it wants to get it's sibling page, so it pops the top of it's stack, and gets it's parent page. Increases `mp_ki`, and it can get it's sibling's page number. What if the current page is already the rightmost page of it's parent? Then the parent page will be popped from the stack, and so on.
+
+In order to improve efficiency, `mdb_cursor_get` provides three types of options for searching.
+
+- MDB_CURSOR or MDB_CURSOR_EXACT:
+
+  Search a key/value pair by the key with `mdb_cursor_set`, the key must not be NULL. The cursor stops at the smallest key greater than or equal to the key provided.
+
+  If MDB_CURSOR_EXACT, a `exact`  parameter is set to see if there is an identical key exist in the database.
+
+- MDB_FIRST
+
+  The key value doesn't matter(but can't be NULL), put the cursor at first slot of the leftmost leaf page. Read the slot key/value pair data into the key and value parameter provided. 
+
+- MDB_NEXT
+
+  Unlike the above two options, the cursor doesn't clean it's stack before doing something. If the cursor is initialized, it keeps where the cursor is, and just increases the index by 1 and read key/value pair into the parameter. Of course, if the index overflows, the cursor moves to the next sibling. So the cursor doesn't have to search from root every time. **This is a prefect option for database scanning.**
+
+#### B+ Tree
+
