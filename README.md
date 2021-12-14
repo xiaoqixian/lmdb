@@ -119,6 +119,8 @@ typedef struct MDB_page {		/* represents a page of storage */
 } MDB_page;
 ```
 
+![](alignment.png)
+
 A page is considered as a continuous logical memory space with a lower address and a upper address. An pointer array is stored in the page that increases from bottom to top, and that is `mp_ptrs` in `MDB_page`. `mp_ptrs` stores all pointers to key/value pairs stored in the same page, so users can quickly get a key/value pair by index. And the pointers stored in this array are sorted by key. So every time a new key/value pair inserted into the page, all pointers respond to the keys that are greater than the key inserted into have to be readjusted. 
 
 Oppositely, all key/value pairs are stored from top to bottom, between `mp_ptrs` and key/value pairs are the free space, maintained by two variables: `pb_lower` and `pb_upper`. If the page passed in is a branch, then the `data` parameter is actually the child page number. Else if the page is a leaf, the `data` is the real data. 
@@ -169,4 +171,20 @@ In order to improve efficiency, `mdb_cursor_get` provides three types of options
   Unlike the above two options, the cursor doesn't clean it's stack before doing something. If the cursor is initialized, it keeps where the cursor is, and just increases the index by 1 and read key/value pair into the parameter. Of course, if the index overflows, the cursor moves to the next sibling. So the cursor doesn't have to search from root every time. **This is a prefect option for database scanning.**
 
 #### B+ Tree
+
+LMDB is a B+tree-based database, even though it's official website said it's based on Btree. 
+
+##### `mdb_split`
+
+`mdb_split` split a page and insert \<key, (data | page number)\> in either left or right sibling. 
+
+When split a page, first create a right sibling, temporarily set the right sibling's parent as the page's parent, and sibling's index as the page's + 1.
+
+Then create a `copy` page which is a copy of the old page, and totally clean the old page (page header remains). Decide the `split_index` as `NUMKEYS(copy)/2+1`. 
+
+Find a separate key and value, the separate key/value pair needs to be inserted into parent page. And the parent page may also need to call `mdb_split` if there's no enough space.
+
+Next, we need to divide keys in the old page into two siblings. For keys with index smaller than split index, divide them into the old page, others divided into the new page. Also the new key/value pair is inserted into the new page.
+
+After all division is done, free the `copy` page. Page split is done.
 
