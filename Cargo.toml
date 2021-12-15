@@ -1,0 +1,8 @@
+[package]
+name = "lmdb"
+description = "Lightning Memory-Mapped Database written in rust"
+version = "0.1.0"
+
+[dependencies]
+memmap = "0.6.1"
+
