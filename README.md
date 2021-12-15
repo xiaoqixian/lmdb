@@ -188,3 +188,40 @@ Next, we need to divide keys in the old page into two siblings. For keys with in
 
 After all division is done, free the `copy` page. Page split is done.
 
+##### `mdb_rebalance`
+
+After deleting a node from a page, the tree may need to be rebalanced. When rebalancing a tree, a page and it's parent must be specified. If more than 1/4 of page space is used, the page doesn't need to rebalance, we call the 1/4 memory page usage as the page fill threshold.
+
+If the current page is the leftmost child of it's parent, then find a right sibling; otherwise find a left sibling. 
+
+If the sibling page is above fill threshold and at least two keys exist in the sibling page, then move one key from it to the current page. If it's a right sibling, then move it's leftmost node; if it's a left sibling, then move it's rightmost node. Otherwise, try to merge the current page with it's sibling page. If it's a right sibling, move all sibling's nodes into the current page, otherwise move all current page's nodes into the sibling page.
+
+##### `mdb_merge`
+
+`mdb_merge` is only called by `mdb_rebalance`, `mdb_merge` logic is pretty simple, it just moves all nodes from src to dst and delete src node from it's parent. 
+
+As we deleted a node from a parent page, it's almost the same thing that we did before calling `mdb_rebalance`, so the `mdb_rebalance` is called again to rebalance the parent page. That's how deletion in a B+ tree works.
+
+You may wonder how the current page's parent gets it's parent page? Well, if you read the source code, and watch the bottom lines of `mdb_merge`:
+
+```c
+	mpp.mp_page = src->mp_parent;
+	dh = (MDB_dhead *)src->mp_parent;
+	dh--;
+	mpp.mp_parent = dh->md_parent;
+	mpp.mp_pi = dh->md_pi;
+```
+
+You may have no idea, what's the point of `dh--`. Well, all new page allocations go through `mdb_newpage` function. When `mdb_newpage` allocate a new page, it allocates size of `page_size*num + sizeof(MDB_dhead)`. That's right, every page comes with a `MDB_dhead`, it's just most of the time we don't use it. But if you get a pointer to a page, decrease it by size of `MDB_dhead`, you get the pointer to it's `MDB_dhead`.
+
+```c
+typedef struct MDB_dhead {					/* a dirty page */
+	SIMPLEQ_ENTRY(MDB_dpage)	 md_next;	/* queue of dirty pages, equals to struct {struct MDB_dpage* sqe_next} */
+	MDB_page	*md_parent;
+	int			md_pi;				/* parent index */
+	int			md_num;
+} MDB_dhead;
+```
+
+In `MDB_dhead`, you can get any page's parent pointer, page index in it's parent, i.e.
+
