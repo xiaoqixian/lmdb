@@ -3142,9 +3142,7 @@ mdb_txn_renew(MDB_txn *txn)
 	return rc;
 }
 
-int
-mdb_txn_begin(MDB_env *env, MDB_txn *parent, unsigned int flags, MDB_txn **ret)
-{
+int mdb_txn_begin(MDB_env *env, MDB_txn *parent, unsigned int flags, MDB_txn **ret) {
 	MDB_txn *txn;
 	MDB_ntxn *ntxn;
 	int rc, size, tsize;
