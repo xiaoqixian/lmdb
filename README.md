@@ -81,9 +81,35 @@ So when commit a transaction, all dirty pages are written back to disk. LMDB use
 
 After all dirty pages have been written back, the `fsync` function is called to synchronize file contents to memory. 
 
-##### `mdb_search_page_root`
+Then we change database meta data and write it back to disk, for all modifications, root page number change is the most important. We assign the new database root page as the current transaction root page. So the whole tree is updated. 
+
+After meta data has been written back to disk, we call `fsync` again to update meta data content. 
+
+##### `mdb_search_page`
 
 `mdb_search_page`  searches a page by a key, but `mdb_search_page` is just a wrapper of `mdb_search_page_root`.
+
+But there's also an important thing it does:
+
+```c
+if (txn == NULL) {
+	if ((rc = mdbenv_read_meta(db->md_env)) != MDB_SUCCESS)
+		return rc;
+	root = db->md_env->me_meta.mm_root;
+} else if (F_ISSET(txn->mt_flags, MDB_TXN_ERROR)) {
+	DPRINTF("transaction has failed, must abort");
+	return EINVAL;
+} else
+	root = txn->mt_root;
+```
+
+Above is the code of choosing which root page to start with. When we need to search page, we may want to get a key without opening a transaction, or we want to put a node inside a page in a transaction. 
+
+If the transaction parameter is NULL, means we just want to read the database, searching the last committed root page is fine, no matter if there's a write transaction or not.
+
+If the transaction parameter is not NULL, means we want to search the new modified but not committed tree. 
+
+##### `mdb_search_page_root`
 
 From the root node, `mdb_search_page_root` finds all the right branch node till get to the right leaf node.
 
