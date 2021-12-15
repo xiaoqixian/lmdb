@@ -56,7 +56,6 @@ typedef uint16_t	 indx_t;
 	ulong		mr_txnid; \
 	pid_t		mr_pid; \
 	pthread_t	mr_tid
-
 typedef struct MDB_rxbody {
 	RXBODY;
 } MDB_rxbody;
@@ -86,7 +85,7 @@ typedef struct MDB_txninfo {
 	char pad[CACHELINE-sizeof(MDB_txbody)];
 	pthread_mutex_t	mt_wmutex;
 	char pad2[CACHELINE-sizeof(pthread_mutex_t)];
-	MDB_reader	mt_readers[1];//c compiler doesn't support array boudary check, so this equals to MDB_reader* mt_readers.
+	MDB_reader	mt_readers[1];
 } MDB_txninfo;
 
 /* Common header for all page types. Overflow pages
@@ -386,7 +385,9 @@ _mdb_cmp(MDB_db *db, const MDB_val *key1, const MDB_val *key2)
 }
 
 /* Allocate new page(s) for writing */
-static MDB_dpage * mdb_newpage(MDB_txn *txn, MDB_page *parent, int parent_idx, int num) {
+static MDB_dpage *
+mdb_newpage(MDB_txn *txn, MDB_page *parent, int parent_idx, int num)
+{
 	MDB_dpage *dp;
 
 	if ((dp = malloc(txn->mt_env->me_head.mh_psize * num + sizeof(MDB_dhead))) == NULL)
@@ -403,7 +404,9 @@ static MDB_dpage * mdb_newpage(MDB_txn *txn, MDB_page *parent, int parent_idx, i
 
 /* Touch a page: make it dirty and re-insert into tree with updated pgno.
  */
-static int mdb_touch(MDB_txn *txn, MDB_pageparent *pp) {
+static int
+mdb_touch(MDB_txn *txn, MDB_pageparent *pp)
+{
 	int rc;
 	MDB_page *mp = pp->mp_page;
 	pgno_t	pgno;
@@ -429,7 +432,9 @@ static int mdb_touch(MDB_txn *txn, MDB_pageparent *pp) {
 	return 0;
 }
 
-int mdbenv_sync(MDB_env *env) {
+int
+mdbenv_sync(MDB_env *env)
+{
 	int rc = 0;
 	if (!F_ISSET(env->me_flags, MDB_NOSYNC)) {
 		if (fsync(env->me_fd))
@@ -438,7 +443,9 @@ int mdbenv_sync(MDB_env *env) {
 	return rc;
 }
 
-int mdb_txn_begin(MDB_env *env, int rdonly, MDB_txn **ret) {
+int
+mdb_txn_begin(MDB_env *env, int rdonly, MDB_txn **ret)
+{
 	MDB_txn	*txn;
 	int rc;
 
@@ -462,7 +469,7 @@ int mdb_txn_begin(MDB_env *env, int rdonly, MDB_txn **ret) {
 	}
 	txn->mt_txnid = env->me_txns->mt_txnid;
 	if (rdonly) {
-		MDB_reader *r = pthread_getspecific(env->me_txkey);//get a value set by pthread_setspecific
+		MDB_reader *r = pthread_getspecific(env->me_txkey);
 		if (!r) {
 			int i;
 			pthread_mutex_lock(&env->me_txns->mt_mutex);
@@ -503,7 +510,9 @@ int mdb_txn_begin(MDB_env *env, int rdonly, MDB_txn **ret) {
 	return MDB_SUCCESS;
 }
 
-void mdb_txn_abort(MDB_txn *txn) {
+void
+mdb_txn_abort(MDB_txn *txn)
+{
 	MDB_dpage *dp;
 	MDB_env	*env;
 
@@ -540,14 +549,16 @@ void mdb_txn_abort(MDB_txn *txn) {
 	free(txn);
 }
 
-int mdb_txn_commit(MDB_txn *txn) {
+int
+mdb_txn_commit(MDB_txn *txn)
+{
 	int		 n, done;
 	ssize_t		 rc;
 	off_t		 size;
 	MDB_dpage	*dp;
 	MDB_env	*env;
 	pgno_t	next;
-	struct iovec	 iov[MDB_COMMIT_PAGES];//iovec supports reading/writing into multiple buffers.
+	struct iovec	 iov[MDB_COMMIT_PAGES];
 
 	assert(txn != NULL);
 	assert(txn->mt_env != NULL);
@@ -649,7 +660,9 @@ done:
 	return MDB_SUCCESS;
 }
 
-static int mdbenv_write_header(MDB_env *env) {
+static int
+mdbenv_write_header(MDB_env *env)
+{
 	struct stat	 sb;
 	MDB_head	*h;
 	MDB_page	*p;
@@ -669,7 +682,7 @@ static int mdbenv_write_header(MDB_env *env) {
 	env->me_head.mh_flags = env->me_flags & 0xffff;
 
 	h = METADATA(p);
-	bcopy(&env->me_head, h, sizeof(*h));//bcopy copys n bytes from me_head to h, even both areas overlap.
+	bcopy(&env->me_head, h, sizeof(*h));
 
 	rc = write(env->me_fd, p, env->me_head.mh_psize);
 	free(p);
@@ -683,7 +696,9 @@ static int mdbenv_write_header(MDB_env *env) {
 	return MDB_SUCCESS;
 }
 
-static int mdbenv_read_header(MDB_env *env) {
+static int
+mdbenv_read_header(MDB_env *env)
+{
 	char		 page[PAGESIZE];
 	MDB_page	*p;
 	MDB_head	*h;
@@ -694,7 +709,7 @@ static int mdbenv_read_header(MDB_env *env) {
 	/* We don't know the page size yet, so use a minimum value.
 	 */
 
-	if ((rc = pread(env->me_fd, page, PAGESIZE, 0)) == 0) {//pread reads without modifying the file pointer.
+	if ((rc = pread(env->me_fd, page, PAGESIZE, 0)) == 0) {
 		return ENOENT;
 	} else if (rc != PAGESIZE) {
 		if (rc > 0)
@@ -755,7 +770,9 @@ mdbenv_init_meta(MDB_env *env)
 	return (rc == env->me_head.mh_psize * 2) ? MDB_SUCCESS : errno;
 }
 
-static int mdbenv_write_meta(MDB_txn *txn) {
+static int
+mdbenv_write_meta(MDB_txn *txn)
+{
 	MDB_env *env;
 	MDB_meta	meta;
 	off_t off;
@@ -836,7 +853,8 @@ mdbenv_read_meta(MDB_env *env)
 	return MDB_SUCCESS;
 }
 
-int mdbenv_create(MDB_env **env)
+int
+mdbenv_create(MDB_env **env)
 {
 	MDB_env *e;
 
@@ -877,7 +895,9 @@ mdbenv_get_maxreaders(MDB_env *env, int *readers)
 	return MDB_SUCCESS;
 }
 
-int mdbenv_open2(MDB_env *env, unsigned int flags) {
+int
+mdbenv_open2(MDB_env *env, unsigned int flags)
+{
 	int i, newenv = 0;
 
 	env->me_flags = flags;
@@ -897,7 +917,8 @@ int mdbenv_open2(MDB_env *env, unsigned int flags) {
 	i = MAP_SHARED;
 	if (env->me_head.mh_address && (flags & MDB_FIXEDMAP))
 		i |= MAP_FIXED;
-	env->me_map = mmap(env->me_head.mh_address, env->me_mapsize, PROT_READ, i, env->me_fd, 0);
+	env->me_map = mmap(env->me_head.mh_address, env->me_mapsize, PROT_READ, i,
+		env->me_fd, 0);
 	if (env->me_map == MAP_FAILED)
 		return errno;
 
@@ -932,7 +953,9 @@ int mdbenv_open2(MDB_env *env, unsigned int flags) {
 	return MDB_SUCCESS;
 }
 
-static void mdbenv_reader_dest(void *ptr) {
+static void
+mdbenv_reader_dest(void *ptr)
+{
 	MDB_reader *reader = ptr;
 
 	reader->mr_txnid = 0;
@@ -940,10 +963,9 @@ static void mdbenv_reader_dest(void *ptr) {
 	reader->mr_tid = 0;
 }
 
-/*
- * open a mdb environment.
- */
-int mdbenv_open(MDB_env *env, const char *path, unsigned int flags, mode_t mode) {
+int
+mdbenv_open(MDB_env *env, const char *path, unsigned int flags, mode_t mode)
+{
 	int		oflags, rc, shmid;
 	off_t	size;
 
@@ -956,10 +978,10 @@ int mdbenv_open(MDB_env *env, const char *path, unsigned int flags, mode_t mode)
 	if ((env->me_fd = open(path, oflags, mode)) == -1)
 		return errno;
 
-	env->me_shmkey = ftok(path, 'm');//convert a pathname and a project identifier to a System V IPC key
+	env->me_shmkey = ftok(path, 'm');
 	size = (env->me_maxreaders-1) * sizeof(MDB_reader) + sizeof(MDB_txninfo);
-	shmid = shmget(env->me_shmkey, size, IPC_CREAT|IPC_EXCL|mode);//allocate a shared memory segment, as IPC_CREAT and IPC_EXCL both specified for shmflags, the shmget fails with errno=EEXIST if a shared memory segment already exists for key.
-	if (shmid == -1) {//shared memory segment allocation failed.
+	shmid = shmget(env->me_shmkey, size, IPC_CREAT|IPC_EXCL|mode);
+	if (shmid == -1) {
 		if (errno == EEXIST) {
 			shmid = shmget(env->me_shmkey, size, IPC_CREAT|mode);
 			if (shmid == -1)
@@ -978,9 +1000,9 @@ int mdbenv_open(MDB_env *env, const char *path, unsigned int flags, mode_t mode)
 	} else {
 		pthread_mutexattr_t mattr;
 
-		env->me_txns = shmat(shmid, NULL, 0);//attach to the segment to get a pointer to it.
+		env->me_txns = shmat(shmid, NULL, 0);
 		pthread_mutexattr_init(&mattr);
-		pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED);//Mutexes created with this attributes object can be shared between any threads that have access to the memory containing the object, including threads in different processes.
+		pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED);
 		pthread_mutex_init(&env->me_txns->mt_mutex, &mattr);
 		pthread_mutex_init(&env->me_txns->mt_wmutex, &mattr);
 		env->me_txns->mt_version = MDB_VERSION;
@@ -1000,7 +1022,9 @@ int mdbenv_open(MDB_env *env, const char *path, unsigned int flags, mode_t mode)
 	return rc;
 }
 
-void mdbenv_close(MDB_env *env) {
+void
+mdbenv_close(MDB_env *env)
+{
 	if (env == NULL)
 		return;
 
@@ -1023,7 +1047,10 @@ void mdbenv_close(MDB_env *env) {
  * If kip is non-null, stores the index of the found entry in *kip.
  * If no entry larger or equal to the key is found, returns NULL.
  */
-static MDB_node *mdb_search_node(MDB_db *bt, MDB_page *mp, MDB_val *key, int *exactp, unsigned int *kip) {
+static MDB_node *
+mdb_search_node(MDB_db *bt, MDB_page *mp, MDB_val *key,
+    int *exactp, unsigned int *kip)
+{
 	unsigned int	 i = 0;
 	int		 low, high;
 	int		 rc = 0;
@@ -1110,11 +1137,9 @@ cursor_push_page(MDB_cursor *cursor, MDB_page *mp)
 	return ppage;
 }
 
-/*
- * firstly search page in dirty pages queue if dirty_queue not empty,
- * if not found, get a page directly by index.
- */
-static MDB_page * mdbenv_get_page(MDB_env *env, pgno_t pgno) {
+static MDB_page *
+mdbenv_get_page(MDB_env *env, pgno_t pgno)
+{
 	MDB_page *p = NULL;
 	MDB_txn *txn = env->me_txn;
 
@@ -1133,10 +1158,10 @@ static MDB_page * mdbenv_get_page(MDB_env *env, pgno_t pgno) {
 	return p;
 }
 
-/*
- * 
- */
-static int mdb_search_page_root(MDB_db *bt, MDB_val *key, MDB_cursor *cursor, int modify, MDB_pageparent *mpp) {
+static int
+mdb_search_page_root(MDB_db *bt, MDB_val *key,
+    MDB_cursor *cursor, int modify, MDB_pageparent *mpp)
+{
 	MDB_page	*mp = mpp->mp_page;
 	int rc;
 
@@ -1183,7 +1208,6 @@ static int mdb_search_page_root(MDB_db *bt, MDB_val *key, MDB_cursor *cursor, in
 			return MDB_FAIL;
 
 		if (modify) {
-            DPRINTF(("mofity in search_page_root"));
 			MDB_dhead *dh = ((MDB_dhead *)mp)-1;
 			if (rc = mdb_touch(bt->md_env->me_txn, mpp))
 				return rc;
@@ -1213,7 +1237,10 @@ static int mdb_search_page_root(MDB_db *bt, MDB_val *key, MDB_cursor *cursor, in
  * If cursor is non-null, pushes parent pages on the cursor stack.
  * If modify is true, visited pages are updated with new page numbers.
  */
-static int mdb_search_page(MDB_db *db, MDB_txn *txn, MDB_val *key, MDB_cursor *cursor, int modify, MDB_pageparent *mpp) {
+static int
+mdb_search_page(MDB_db *db, MDB_txn *txn, MDB_val *key,
+    MDB_cursor *cursor, int modify, MDB_pageparent *mpp)
+{
 	int		 rc;
 	pgno_t		 root;
 
@@ -1249,7 +1276,6 @@ static int mdb_search_page(MDB_db *db, MDB_txn *txn, MDB_val *key, MDB_cursor *c
 	if (modify && !F_ISSET(mpp->mp_page->mp_flags, P_DIRTY)) {
 		mpp->mp_parent = NULL;
 		mpp->mp_pi = 0;
-        DPRINTF(("need to modify page, touch a new page."));
 		if ((rc = mdb_touch(txn, mpp)))
 			return rc;
 		txn->mt_root = mpp->mp_page->mp_pgno;
@@ -1386,7 +1412,9 @@ mdb_set_key(MDB_db *bt, MDB_page *mp, MDB_node *node,
 	return 0;
 }
 
-static int mdb_cursor_next(MDB_cursor *cursor, MDB_val *key, MDB_val *data) {
+static int
+mdb_cursor_next(MDB_cursor *cursor, MDB_val *key, MDB_val *data)
+{
 	MDB_ppage	*top;
 	MDB_page	*mp;
 	MDB_node	*leaf;
@@ -1500,7 +1528,10 @@ mdb_cursor_first(MDB_cursor *cursor, MDB_val *key, MDB_val *data)
 	return mdb_set_key(cursor->mc_db, mpp.mp_page, leaf, key);
 }
 
-int mdb_cursor_get(MDB_cursor *cursor, MDB_val *key, MDB_val *data, MDB_cursor_op op) {
+int
+mdb_cursor_get(MDB_cursor *cursor, MDB_val *key, MDB_val *data,
+    MDB_cursor_op op)
+{
 	int		 rc;
 	int		 exact = 0;
 
@@ -1540,7 +1571,9 @@ int mdb_cursor_get(MDB_cursor *cursor, MDB_val *key, MDB_val *data, MDB_cursor_o
 
 /* Allocate a page and initialize it
  */
-static MDB_dpage * mdbenv_new_page(MDB_env *env, uint32_t flags, int num) {
+static MDB_dpage *
+mdbenv_new_page(MDB_env *env, uint32_t flags, int num)
+{
 	MDB_dpage	*dp;
 
 	assert(env != NULL);
@@ -1566,7 +1599,9 @@ static MDB_dpage * mdbenv_new_page(MDB_env *env, uint32_t flags, int num) {
 	return dp;
 }
 
-static size_t mdb_leaf_size(MDB_db *db, MDB_val *key, MDB_val *data) {
+static size_t
+mdb_leaf_size(MDB_db *db, MDB_val *key, MDB_val *data)
+{
 	size_t		 sz;
 
 	sz = LEAFSIZE(key, data);
@@ -1593,7 +1628,10 @@ mdb_branch_size(MDB_db *db, MDB_val *key)
 	return sz + sizeof(indx_t);
 }
 
-static int mdb_add_node(MDB_db *db, MDB_page *mp, indx_t indx, MDB_val *key, MDB_val *data, pgno_t pgno, uint8_t flags) {
+static int
+mdb_add_node(MDB_db *db, MDB_page *mp, indx_t indx,
+    MDB_val *key, MDB_val *data, pgno_t pgno, uint8_t flags)
+{
 	unsigned int	 i;
 	size_t		 node_size = NODESIZE;
 	indx_t		 ofs;
@@ -1619,8 +1657,8 @@ static int mdb_add_node(MDB_db *db, MDB_page *mp, indx_t indx, MDB_val *key, MDB
 			int ovpages = PAGEHDRSZ + data->mv_size + db->md_env->me_head.mh_psize - 1;
 			ovpages /= db->md_env->me_head.mh_psize;
 			/* Put data on overflow page. */
-			DPRINTF("data size is %zu, put on %d overflow pages",
-			    data->mv_size, ovpages);
+			DPRINTF("data size is %zu, put on overflow page",
+			    data->mv_size);
 			node_size += sizeof(pgno_t);
 			if ((ofp = mdbenv_new_page(db->md_env, P_OVERFLOW, ovpages)) == NULL)
 				return MDB_FAIL;
@@ -1721,7 +1759,9 @@ mdb_del_node(MDB_db *db, MDB_page *mp, indx_t indx)
 	mp->mp_upper += sz;
 }
 
-int mdb_cursor_open(MDB_db *db, MDB_txn *txn, MDB_cursor **ret) {
+int
+mdb_cursor_open(MDB_db *db, MDB_txn *txn, MDB_cursor **ret)
+{
 	MDB_cursor	*cursor;
 
 	if (db == NULL || ret == NULL)
@@ -2234,7 +2274,10 @@ mdb_split(MDB_db *bt, MDB_page **mpp, unsigned int *newindxp,
 	return rc;
 }
 
-int mdb_put(MDB_db *bt, MDB_txn *txn, MDB_val *key, MDB_val *data, unsigned int flags) {
+int
+mdb_put(MDB_db *bt, MDB_txn *txn,
+    MDB_val *key, MDB_val *data, unsigned int flags)
+{
 	int		 rc = MDB_SUCCESS, exact;
 	unsigned int	 ki;
 	MDB_node	*leaf;
@@ -2291,7 +2334,7 @@ int mdb_put(MDB_db *bt, MDB_txn *txn, MDB_val *key, MDB_val *data, unsigned int 
 	else
 		goto done;
 
-	assert(IS_LEAF(mpp.mp_page));//definitely B+ tree.
+	assert(IS_LEAF(mpp.mp_page));
 	DPRINTF("there are %lu keys, should insert new key at index %i",
 		NUMKEYS(mpp.mp_page), ki);
 
