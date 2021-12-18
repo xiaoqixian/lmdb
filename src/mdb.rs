@@ -9,15 +9,16 @@
 
 use std::sync::{Arc, Mutex};
 use std::fs::{File, OpenOptions};
-use memmap::{MmapMut};
+use memmap::{self, MmapMut};
 use std::collections::{VecDeque};
 use std::thread;
-use std::mem;
+use std::mem::{self, size_of};
 use crate::errors::Errors;
 use std::io;
 use std::os::unix::prelude::FileExt;
-use std::ptr;
+use std::ptr::{self,};
 
+use crate::{info, debug, error, jump_head};
 
 type Pageno = usize;
 type Ptr = [u8];
@@ -30,6 +31,11 @@ macro_rules! offset_of {
 }
 
 mod consts {
+    ///meta data consts
+    pub const VERSION: u32 = 1;
+    pub const MAGIC: u32 = 0xBEEFC0DE;
+    pub const MAX_KEY_SIZE: usize = 255;
+
     ///page flags and consts
     pub const P_INVALID: super::Pageno = std::usize::MAX;//invalid page number
     pub const P_HEAD: u32 = 0x01;
@@ -70,13 +76,17 @@ struct Page {
     pageno: Pageno,
     page_flags: u32,
     page_bounds: PageBounds,
-    ptrs: *mut u8 // ptrs are for accessing left space of a page, so pointer type doesn't really matter, and that's why I have to keep Page fields in order.
+    /// size of overflow pages
+    overflow_pages: usize,
+    //ptrs: *mut u8 // ptrs are for accessing left space of a page, so pointer type doesn't really matter, and that's why I have to keep Page fields in order.
 }
 
 struct DBHead {
-    version: usize,
+    version: u32,
+    magic: u32,
     page_size: usize, // os memory page size, in C, got by sysconf(_SC_PAGE_SIZE)
     flags: u32,
+    /// size of map region
     mapsize: usize
 }
 
@@ -178,10 +188,11 @@ impl Env {
             mmap: None,
             w_txn: None,
             env_head: Some(DBHead {
-                version: 1,
-                page_size: consts::PAGE_SIZE,
+                version: 0,
+                magic: 0,
+                page_size: 0,
                 flags: 0,
-                mapsize: 1048576
+                mapsize: 0,
             }),
             env_meta: None,//later to read in with env_open().
             txn_info: Some(TxnInfo {
@@ -192,7 +203,8 @@ impl Env {
     }
 
     /**
-     * open a database file.
+     * Open a database file.
+     * Create mode: create database if not exist.
      */
     fn env_open(&mut self, path: &str, flags: u32, mode: u32) -> Result<(), Errors> {
         if mode & consts::READ_ONLY != 0 && mode & consts::READ_WRITE != 0 {
@@ -231,9 +243,39 @@ impl Env {
             }
         }
 
+        let mut new_env = false;
+        match self.env_read_header() {
+            Ok(_) => {},
+            Err(Errors::EmptyFile) => {
+                new_env = true;
+            },
+            Err(e) => {
+                return Err(e);
+            }
+        }
+
+        /// as memmap doesn't allow 0-length file mapped
+        /// so init a file first if creating a new env
+        if new_env {
+            debug!("Creating new database file: {}", path);
+            self.env_write_header();
+        }
+
+        self.mmap = Some(unsafe {
+            match memmap::MmapMut::map_mut(self.fd.as_ref().unwrap()) {
+                Err(e) => {
+                    return Err(Errors::MmapError(String::from(format!("memmap error: {:?}", e))));
+                },
+                Ok(v) => v
+            }
+        });
+
         Ok(())
     }
 
+    /**
+     * Read database file header.
+     */
     fn env_read_header(&mut self) -> Result<(), Errors> {
         if let None = self.fd {
             return Err(Errors::Seldom(String::from("environment file handle is None")));
@@ -253,12 +295,54 @@ impl Env {
             }
         }
 
-        let head_page: Page = unsafe {
-            std::ptr::read(buf.as_ptr() as *const _)
-        };
-        
+        let page_ptr: *const u8 = buf.as_ptr();
+
+        let head_page: &Page = unsafe {&*(page_ptr as *const Page)};
         assert!(head_page.page_flags & consts::P_HEAD == 0);
 
+        //let header: &DBHead = unsafe { // header of database
+            //&*(page_ptr.offset(size_of::<Page>() as isize) as *const DBHead)
+        //};
+        let header: &DBHead = jump_head!(page_ptr, DBHead);
+
+        if header.version > consts::VERSION {
+            return Err(Errors::InvalidVersion(header.version));
+        } else if header.magic != consts::MAGIC {
+            return Err(Errors::InvalidMagic(header.magic));
+        }
+
+        unsafe {ptr::copy(page_ptr.offset(size_of::<Page>() as isize) as *const DBHead, self.env_head.as_mut().unwrap() as *mut DBHead, 1)};
+
+        assert_eq!(self.env_head.as_ref().unwrap().magic, consts::MAGIC);
+        Ok(())
+    }
+
+    /**
+     * When creating a new env, need to write a header to file first before mapping.
+     */
+    fn env_write_header(&mut self) -> Result<(), Errors> {
+        let head = DBHead {
+            version: consts::VERSION,
+            magic: consts::MAGIC,
+            flags: 0,
+            page_size: consts::PAGE_SIZE,
+            mapsize: 0
+        };
+        
+        let head_buf = unsafe {
+            std::slice::from_raw_parts(&head as *const _ as *const u8, size_of::<DBHead>())
+        };
+
+        match self.fd.as_ref().unwrap().write_at(head_buf.as_ref(), 0) {
+            Err(e) => {
+                return Err(Errors::StdWriteError(format!("{:?}", e)));
+            },
+            Ok(write_size) => {
+                if write_size < size_of::<DBHead>() {
+                    return Err(Errors::ShortWrite(format!("Header short write: {}", write_size)));
+                }
+            }
+        }
         Ok(())
     }
 }

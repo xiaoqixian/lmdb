@@ -13,7 +13,17 @@ pub enum Errors {
     StdIOError(String),
     StdFileError(String),
     StdReadError(String),
+    StdWriteError(String),
     ShortRead(String),
+    ShortWrite(String),
+    CreateExistFile(String),
+
+    ///File content errors
+    InvalidVersion(u32),
+    InvalidMagic(u32),
+
+    ///memmap crate errors
+    MmapError(String),
 
     ///Common errors
     InvalidFlag(u32),
