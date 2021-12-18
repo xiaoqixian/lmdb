@@ -259,6 +259,7 @@ impl Env {
         if new_env {
             debug!("Creating new database file: {}", path);
             self.env_write_header();
+            self.env_read_header();
         }
 
         self.mmap = Some(unsafe {
@@ -344,5 +345,43 @@ impl Env {
             }
         }
         Ok(())
+    }
+
+    /**
+     * Initialize metadata page, with two toggle pages.
+     */
+    fn env_init_meta(&mut self) -> Result<(), Errors> {
+        let page_ptr1: *mut u8 = Box::new([0; self.env_head.as_ref().unwrap().page_size]).as_mut().as_mut_ptr();
+        let page_ptr2: *mut u8 = Box::new([0; self.env_head.as_ref().unwrap().page_size]).as_mut().as_mut_ptr();
+
+        let page1: &mut Page = unsafe {
+            &mut *(page_ptr1 as *mut Page)
+        };
+
+        let page2: &mut Page = unsafe {
+            &mut *(page_ptr2 as *mut Page)
+        };
+
+        page1.pageno = 1;
+        page1.flags = consts::P_META;
+
+        page2.pageno = 2;
+        page2.flags = consts::P_META;
+
+        let meta1: &mut DBMetaData = jump_head_mut!(page_ptr1, DBMetaData);
+        let meta2: &mut DBMetaData = jump_head_mut!(page_ptr2, DBMetaData);
+
+        meta1.db_stat = DBStat {
+            page_size: self.env_head.page_size,
+            depth: 0,
+            branch_pages: 0,
+            leaf_pages: 0,
+            overflow_pages: 0,
+            entries: 0
+        };
+        meta1.root = consts::P_INVALID;
+        meta1.last_page = 2;
+        meta1.txn_id = 0;
+
     }
 }
