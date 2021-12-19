@@ -7,27 +7,34 @@
   > Copyright@ https://github.com/xiaoqixian
  **********************************************/
 
+use std::io;
+use memmap;
+
 #[derive(Debug)]
 pub enum Errors {
     ///File IO errors
-    StdIOError(String),
-    StdFileError(String),
-    StdReadError(String),
-    StdWriteError(String),
-    ShortRead(String),
-    ShortWrite(String),
-    CreateExistFile(String),
+    StdIOError(io::Error),
+    StdFileError(io::Error),
+    StdReadError(io::Error),
+    StdWriteError(io::Error),
+    ShortRead(usize),
+    ShortWrite(usize),
+    //CreateExistFile(String),
 
     ///File content errors
     InvalidVersion(u32),
     InvalidMagic(u32),
 
+    ///Alloc crate errors
+    LayoutError(std::alloc::LayoutError),
+
     ///memmap crate errors
-    MmapError(String),
+    MmapError(io::Error),
 
     ///Common errors
     InvalidFlag(u32),
-    Seldom(String),
+    UnexpectedNoneValue(String),
+    UnmappedEnv,
 
     ///harmless errors
     EmptyFile,

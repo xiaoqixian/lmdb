@@ -72,7 +72,7 @@ macro_rules! error {
 macro_rules! jump_head {
     ($ptr: expr, $type: ty) => {
         unsafe {
-            &*($ptr.offset(size_of::<Page>() as isize) as *const $type)
+            &*($ptr.offset(size_of::<PageHead>() as isize) as *const $type)
         }
     }
 }
@@ -81,7 +81,7 @@ macro_rules! jump_head {
 macro_rules! jump_head_mut {
     ($ptr: expr, $type: ty) => {
         unsafe {
-            &mut *($ptr.offset(size_of::<Page>() as isize) as *mut $type)
+            &mut *($ptr.offset(size_of::<PageHead>() as isize) as *mut $type)
         }
     }
 }

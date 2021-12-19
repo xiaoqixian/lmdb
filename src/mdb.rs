@@ -7,7 +7,7 @@
   > Copyright@ https://github.com/xiaoqixian
  **********************************************/
 
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard};
 use std::fs::{File, OpenOptions};
 use memmap::{self, MmapMut};
 use std::collections::{VecDeque};
@@ -17,8 +17,9 @@ use crate::errors::Errors;
 use std::io;
 use std::os::unix::prelude::FileExt;
 use std::ptr::{self,};
+use std::alloc::{alloc, dealloc, Layout};
 
-use crate::{info, debug, error, jump_head};
+use crate::{info, debug, error, jump_head, jump_head_mut};
 
 type Pageno = usize;
 type Ptr = [u8];
@@ -61,8 +62,8 @@ struct Val {
  * Structure of a memory page.
  * Includes header, pointer array, empty space and heap area.
  * 
- * As the order of Page fields does matter, I have to use #[repr(C)]
- * so the compiler won't disorder Page fields. But alignment is still
+ * As the order of PageHead fields does matter, I have to use #[repr(C)]
+ * so the compiler won't disorder PageHead fields. But alignment is still
  * optimized.
  */
 /// page bounds
@@ -71,14 +72,12 @@ struct PageBounds {
     lower_bound: usize
 }
 
-#[repr(C)]
-struct Page {
+struct PageHead {
     pageno: Pageno,
     page_flags: u32,
     page_bounds: PageBounds,
     /// size of overflow pages
     overflow_pages: usize,
-    //ptrs: *mut u8 // ptrs are for accessing left space of a page, so pointer type doesn't really matter, and that's why I have to keep Page fields in order.
 }
 
 struct DBHead {
@@ -112,7 +111,7 @@ struct DBMetaData {
     ///last used page in file
     pub last_page: Pageno, 
     ///last commited transaction id.
-    pub txn_id: u32, 
+    pub last_txn_id: u32, 
 }
 
 struct DB {
@@ -135,20 +134,23 @@ struct Env {
  * Information for managing transactions.
  */
 struct TxnInfo {
+    txn_id: u32, 
     ///write transaction mutex, only one write transaction allowed at a time.
     write_mutex: Arc<Mutex<i32>>,
     readers: Vec<Reader>
 }
 
 union unit {
-    dirty_queue: mem::ManuallyDrop<VecDeque<Pageno>>,
+    dirty_queue: VecDeque<NonNull<*mut u8>>,
     reader: Reader //Reader record read thread information
 }
 struct Txn {
     txn_id: u32,
     txn_root: Pageno,
     txn_next_pgno: Pageno,
-    env: &'static Env,//as when begin a transaction, you have to create a environment, so static reference is fine.
+    txn_first_pgno: Pageno,
+    env: Arc<Env>,
+    write_lock: MutexGuard<i32>,
     u: unit, //if a write transaction, it's dirty_queue; if a read transaction, it's Reader
     flags: u32
 }
@@ -196,6 +198,7 @@ impl Env {
             }),
             env_meta: None,//later to read in with env_open().
             txn_info: Some(TxnInfo {
+                txn_id: 0,
                 write_mutex: Arc::new(Mutex::new(0)),//the number doesn't matter
                 readers: Vec::new()
             })
@@ -221,7 +224,7 @@ impl Env {
             .create(create)
             .open(path) {
                 Err(e) => {
-                    return Err(Errors::StdFileError(String::from(format!("{:?}", e))));
+                    return Err(Errors::StdFileError(e));
                 },
                 Ok(v) => v
         };
@@ -229,19 +232,19 @@ impl Env {
         self.fd = Some(fd);
         
         self.env_flags = flags;
-        match self.env_meta {
-            Some(_) => {
-                panic!("new environment should not have any metadata");
-            },
-            None => {
-                self.env_meta = Some(DBMetaData {
-                    db_stat: DBStat::new(),
-                    root: consts::P_INVALID,
-                    last_page: 2, //first 2 pages are for sure: P_HEAD & P_META
-                    txn_id: 0
-                });
-            }
-        }
+/*        match self.env_meta {*/
+            /*Some(_) => {*/
+                /*panic!("new environment should not have any metadata");*/
+            /*},*/
+            /*None => {*/
+                /*self.env_meta = Some(DBMetaData {*/
+                    /*db_stat: DBStat::new(),*/
+                    /*root: consts::P_INVALID,*/
+                    /*last_page: 2, //first 2 pages are for sure: P_HEAD & P_META*/
+                    /*txn_id: 0*/
+                /*});*/
+            /*}*/
+        /*}*/
 
         let mut new_env = false;
         match self.env_read_header() {
@@ -258,14 +261,18 @@ impl Env {
         /// so init a file first if creating a new env
         if new_env {
             debug!("Creating new database file: {}", path);
-            self.env_write_header();
-            self.env_read_header();
+            self.env_write_header()?;
+            self.env_read_header()?;
+
+            self.env_init_meta()?;
         }
+
+        self.env_read_meta()?;
 
         self.mmap = Some(unsafe {
             match memmap::MmapMut::map_mut(self.fd.as_ref().unwrap()) {
                 Err(e) => {
-                    return Err(Errors::MmapError(String::from(format!("memmap error: {:?}", e))));
+                    return Err(Errors::MmapError(e));
                 },
                 Ok(v) => v
             }
@@ -279,26 +286,26 @@ impl Env {
      */
     fn env_read_header(&mut self) -> Result<(), Errors> {
         if let None = self.fd {
-            return Err(Errors::Seldom(String::from("environment file handle is None")));
+            return Err(Errors::UnexpectedNoneValue(String::from("environment file handle is None")));
         }
 
         let mut buf = [0 as u8; consts::PAGE_SIZE];
         match self.fd.as_ref().unwrap().read_at(&mut buf, 0) {
             Err(e) => {
-                return Err(Errors::StdReadError(String::from(format!("{:?}", e))));
+                return Err(Errors::StdReadError(e));
             },
             Ok(read_size) => {
                 if read_size == 0 {
                     return Err(Errors::EmptyFile);
                 } else if read_size < consts::PAGE_SIZE {
-                    return Err(Errors::ShortRead(String::from(format!("read_size: {}", read_size))));
+                    return Err(Errors::ShortRead(read_size));
                 } 
             }
         }
 
         let page_ptr: *const u8 = buf.as_ptr();
 
-        let head_page: &Page = unsafe {&*(page_ptr as *const Page)};
+        let head_page: &PageHead = unsafe {&*(page_ptr as *const PageHead)};
         assert!(head_page.page_flags & consts::P_HEAD == 0);
 
         //let header: &DBHead = unsafe { // header of database
@@ -312,7 +319,7 @@ impl Env {
             return Err(Errors::InvalidMagic(header.magic));
         }
 
-        unsafe {ptr::copy(page_ptr.offset(size_of::<Page>() as isize) as *const DBHead, self.env_head.as_mut().unwrap() as *mut DBHead, 1)};
+        unsafe {ptr::copy(page_ptr.offset(size_of::<PageHead>() as isize) as *const DBHead, self.env_head.as_mut().unwrap() as *mut DBHead, 1)};
 
         assert_eq!(self.env_head.as_ref().unwrap().magic, consts::MAGIC);
         Ok(())
@@ -336,11 +343,11 @@ impl Env {
 
         match self.fd.as_ref().unwrap().write_at(head_buf.as_ref(), 0) {
             Err(e) => {
-                return Err(Errors::StdWriteError(format!("{:?}", e)));
+                return Err(Errors::StdWriteError(e));
             },
             Ok(write_size) => {
                 if write_size < size_of::<DBHead>() {
-                    return Err(Errors::ShortWrite(format!("Header short write: {}", write_size)));
+                    return Err(Errors::ShortWrite(write_size));
                 }
             }
         }
@@ -351,28 +358,36 @@ impl Env {
      * Initialize metadata page, with two toggle pages.
      */
     fn env_init_meta(&mut self) -> Result<(), Errors> {
-        let page_ptr1: *mut u8 = Box::new([0; self.env_head.as_ref().unwrap().page_size]).as_mut().as_mut_ptr();
-        let page_ptr2: *mut u8 = Box::new([0; self.env_head.as_ref().unwrap().page_size]).as_mut().as_mut_ptr();
+        let page_size: usize = self.env_head.as_ref().unwrap().page_size;
+        let layout = match Layout::from_size_align(page_size*2, size_of::<u8>()) {
+            Ok(v) => v,
+            Err(e) => {
+                return Err(Errors::LayoutError(e));
+            }
+        };
+        let page_ptr1 = unsafe {alloc(layout)};
+        assert!(!page_ptr1.is_null());
+        let page_ptr2 = unsafe {page_ptr1.offset(page_size as isize)};
 
-        let page1: &mut Page = unsafe {
-            &mut *(page_ptr1 as *mut Page)
+        let page1: &mut PageHead = unsafe {
+            &mut *(page_ptr1 as *mut PageHead)
         };
 
-        let page2: &mut Page = unsafe {
-            &mut *(page_ptr2 as *mut Page)
+        let page2: &mut PageHead = unsafe {
+            &mut *(page_ptr2 as *mut PageHead)
         };
 
         page1.pageno = 1;
-        page1.flags = consts::P_META;
+        page1.page_flags = consts::P_META;
 
         page2.pageno = 2;
-        page2.flags = consts::P_META;
+        page2.page_flags = consts::P_META;
 
         let meta1: &mut DBMetaData = jump_head_mut!(page_ptr1, DBMetaData);
         let meta2: &mut DBMetaData = jump_head_mut!(page_ptr2, DBMetaData);
 
         meta1.db_stat = DBStat {
-            page_size: self.env_head.page_size,
+            page_size: self.env_head.as_ref().unwrap().page_size,
             depth: 0,
             branch_pages: 0,
             leaf_pages: 0,
@@ -383,5 +398,110 @@ impl Env {
         meta1.last_page = 2;
         meta1.txn_id = 0;
 
+        meta2.db_stat = DBStat {
+            page_size: self.env_head.as_ref().unwrap().page_size,
+            depth: 0,
+            branch_pages: 0,
+            leaf_pages: 0,
+            overflow_pages: 0,
+            entries: 0
+        };
+        meta2.root = consts::P_INVALID;
+        meta2.last_page = 2;
+        meta2.txn_id = 0;
+
+        let buf = unsafe {
+            std::slice::from_raw_parts(page_ptr1, page_size*2)
+        };
+
+        match self.fd.as_ref().unwrap().write_at(&buf, page_size as u64) {
+            Err(e) => {
+                return Err(Errors::StdWriteError(e));
+            },
+            Ok(write_size) => {
+                if (write_size < page_size*2) {
+                    return Err(Errors::ShortWrite(write_size));
+                }
+            }
+        }
+
+        unsafe {dealloc(page_ptr1, layout)};//always remember to dealloc memory allocated by alloc
+        Ok(())
+    }
+
+    fn env_read_meta(&mut self) -> Result<(), Errors> {
+        let page_ptr1 = self.get_page(1)?;
+        let page_ptr2 = self.get_page(2)?;
+        
+        let page1: &PageHead = unsafe {
+            &*(page_ptr1 as *const PageHead)
+        };
+        assert!(page1.page_flags & consts::P_META != 0);
+        
+        let page2: &PageHead = unsafe {
+            &*(page_ptr2 as *const PageHead)
+        };
+        assert!(page2.page_flags & consts::P_META != 0);
+
+        let meta1: &DBMetaData = jump_head!(page_ptr1, DBMetaData);
+        let meta2: &DBMetaData = jump_head!(page_ptr2, DBMetaData);
+
+        self.env_meta = Some(
+            if meta2.last_txn_id > meta1.last_txn_id {
+                debug!("Using meta page 2");
+                *meta2
+            } else {
+                debug!("Using meta page 1");
+                *meta1
+            }
+        );
+        Ok(())
+    }
+
+    pub fn get_page(&mut self, pageno: Pageno) -> Result<*mut u8, Errors> {
+        if (match self.w_txn {Some(_) => true, None => false}&& pageno >= self.w_txn.as_ref().unwrap().txn_first_pgno) {
+            Ok(ptr::null_mut()) //temporary
+        } else {
+            let map_ptr: *mut u8 = self.mmap.as_mut().unwrap().as_mut().as_mut_ptr();
+            let page_size = self.env_head.as_ref().unwrap().page_size;
+            Ok(unsafe {map_ptr.offset((pageno * page_size) as isize)})
+        }
+    }
+}
+
+
+impl Txn {
+    pub fn new(env: &Arc<Env>, read_only: bool) -> Result<Self, Errors> {
+        let env_mut_ref: &mut Env = unsafe {
+            &mut *(Arc::into_raw(env) as *mut Env)
+        };
+        if !read_only {
+            debug!("try to lock write_mutex");
+            let mutex_guard: MutexGuard<i32> = env.txn_info.write_mutex.lock().unwrap();
+            debug!("write_mutex unlocked");
+
+            env_mut_ref.txn_info.txn_id += 1;
+            
+            ///always read metadata before begin a new transaction
+            ///read metadata also won't affect read transactions because of toggle meta pages. 
+            env_mut_ref.env_read_meta()?;
+
+            let txn: Self = Self {
+                txn_id: env_mut_ref.txn_info.txn_id,
+                txn_root: env_meta.root,
+                txn_next_pgno: env_meta.last_page+1,
+                txn_first_pgno: env_meta.last_page+1,
+                env: env.clone(),
+                write_lock: mutex_guard,
+                u: unit {
+                    dirty_queue: VecDeque::new()
+                },
+                flags: 0
+            };
+
+            debug!("begin a write transaction {} on root {}", &txn.txn_id, &txn.txn_root);
+            Ok(txn)
+        } else {
+        }
     }
 }

@@ -259,3 +259,10 @@ For normal data pages, when a writer need to modify it, we have copy-on-write me
 
 So, to solve this problem. We use **two metadata pages** for switching, in program, this is called `metatoggle`. When reading the metadata page, no matter it's a reader or writer, we always read the page with the newest transaction id (newest transaction has the largest id). And when a writer commits a transaction, it always modifies the metadata page with the relatively older transaction id and updates the page's transaction id. So the upcoming readers/writers will read this page. And the next writer will commit to another page.
 
+#### Shared Environment
+
+In LMDB, there could be one write transaction and multiple read transactions, each transaction holds a reference to the environment so they can get environment information whenever they want, as this reference is shared between threads. I'm gonna wrap an immutable environment reference in `Arc`.
+
+As when a write transaction commits, it will change environment metadata and flush some pages. In this case, we have to convert this immutable environment reference into a raw pointer and turns it a mutable reference so we can do something to it. But we can make sure only one write transaction at once.
+
+As when we create a write transaction, we need to lock the write mutex so there's only one write transaction exists. In Rust, the locked mutex will be automatically unlocked when the return result of `lock` function is dropped. That's not what we want to see, we lock the mutex when write transaction begins, and hope it keeps unlocked until the transaction committed or aborted, so we need have the write transaction holds the return result of `lock` function so it won't be dropped.
