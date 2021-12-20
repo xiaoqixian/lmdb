@@ -7,3 +7,4 @@ edition = "2021"
 [dependencies]
 memmap = "0.6.1"
 colour = "0.6"
+lock_api = "0.1.3"

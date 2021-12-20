@@ -33,7 +33,7 @@ macro_rules! debug {
     ($string: expr) => {
         colour::yellow_ln!("[DEBUG {}:{}] {}", file!(), line!(), $string);
     };
-    ($string: expr, $($formats: expr)*) => {
+    ($string: expr, $($formats: tt)*) => {
         let s = format!($string, $($formats)*);
         colour::yellow_ln!("[DEBUG {}:{}] {}", file!(), line!(), s);
     }

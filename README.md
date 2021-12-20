@@ -266,3 +266,15 @@ In LMDB, there could be one write transaction and multiple read transactions, ea
 As when a write transaction commits, it will change environment metadata and flush some pages. In this case, we have to convert this immutable environment reference into a raw pointer and turns it a mutable reference so we can do something to it. But we can make sure only one write transaction at once.
 
 As when we create a write transaction, we need to lock the write mutex so there's only one write transaction exists. In Rust, the locked mutex will be automatically unlocked when the return result of `lock` function is dropped. That's not what we want to see, we lock the mutex when write transaction begins, and hope it keeps unlocked until the transaction committed or aborted, so we need have the write transaction holds the return result of `lock` function so it won't be dropped.
+
+#### Begin A Transaction
+
+First, let's talk about read only transactions. When a thread begins a new read only transaction (we view all concurrent accesses to the database are from threads, no matter if they are from a single process or multiple processes), we need to register it's thread information, and when we need to register the thread's information. 
+
+##### Mutual References
+
+In the program, we hope a transaction and the environment it belongs to are able to find each other. So we have to add references point to each other in their struct signature. 
+
+But hey, this is in Rust, you can't just put references in a struct and think you can get the variable it refers whenever you want to. You have to decide both variables' lifetimes. Here, when a transaction is valid, it must have a valid environment belonged to. So we put a strong reference count of environment in a transaction, and as it's in multiple-threads, we use `Arc`, so the environment variable can't be dropped as long as there's at least one thread exists. 
+
+And for the environment, it's OK if the write transaction it refers is dropped, cause we don't need it anymore. So `Weak` reference count is a perfect choice.
