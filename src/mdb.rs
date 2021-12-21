@@ -7,7 +7,7 @@
   > Copyright@ https://github.com/xiaoqixian
  **********************************************/
 
-use std::sync::{Arc, Weak, atomic::{AtomicU8, Ordering}, Mutex};
+use std::sync::{Arc, Weak, atomic::{AtomicU8, Ordering}, Mutex, MutexGuard};
 use std::fs::{File, OpenOptions};
 use memmap::{self, MmapMut};
 use std::collections::{VecDeque};
@@ -124,11 +124,11 @@ struct DB {
     db_head: DBHead
 }
 
-struct Env {
+struct Env<'a> {
     env_flags: u32,
     fd: Option<File>,
     mmap: Option<MmapMut>,
-    w_txn: Option<Weak<Txn>>, //current write transaction
+    w_txn: Option<Weak<Txn<'a>>>, //current write transaction
     env_head: Option<DBHead>,
     env_meta: Option<DBMetaData>,
     txn_info: Option<TxnInfo>,
@@ -141,8 +141,8 @@ struct TxnInfo {
     txn_id: u32, 
     ///write transaction atomic value, only when the value is 0, the write transaction
     ///can be begined.
-    write_mutex: AtomicU8,
-    read_mutex: Arc<Mutex<i32>>,
+    write_mutex: Mutex<i32>,
+    read_mutex: Mutex<i32>,
     readers: [Reader; consts::MAX_READERS]
 }
 
@@ -150,15 +150,15 @@ union unit {
     dirty_queue: mem::ManuallyDrop<VecDeque<NonNull<*mut u8>>>,
     reader: Reader //Reader record read thread information
 }
-struct Txn {
+struct Txn<'a> {
     txn_id: u32,
-    txn_root: Pageno,
-    txn_next_pgno: Pageno,
-    txn_first_pgno: Pageno,
-    env: Arc<Env>,
-    //write_lock: Option<MutexGuard<'a, i32>>,
+    txn_root: Mutex<Pageno>,
+    txn_next_pgno: Mutex<Pageno>,
+    txn_first_pgno: Mutex<Pageno>,
+    env: Arc<Env<'a>>,
+    write_lock: Option<MutexGuard<'a, i32>>,
     u: unit, //if a write transaction, it's dirty_queue; if a read transaction, it's Reader
-    flags: u32
+    flags: Mutex<u32>
 }
 
 #[derive(Copy, Clone)]
@@ -186,7 +186,7 @@ impl DB {
     
 }
 
-impl Env {
+impl Env<'_> {
     /**
      * create a new environment
      */
@@ -206,8 +206,8 @@ impl Env {
             env_meta: None,//later to read in with env_open().
             txn_info: Some(TxnInfo {
                 txn_id: 0,
-                write_mutex: AtomicU8::new(0),
-                read_mutex: Arc::new(Mutex::new(0)),
+                write_mutex: Mutex::new(0),
+                read_mutex: Mutex::new(0),
                 readers: [Reader {tid: thread::current().id(), pid: 0}; consts::MAX_READERS] //if reader is null identified by pid.
             })
         }
@@ -473,7 +473,7 @@ impl Env {
                     panic!("env write transaction is some but dropped");
                 },
                 Some(v) => {
-                    pageno >= v.txn_first_pgno
+                    pageno >= *v.txn_first_pgno.lock().unwrap()
                 }
             };
             Ok(ptr::null_mut()) //temporary
@@ -486,46 +486,55 @@ impl Env {
 }
 
 
-impl Txn {
-    pub fn new(env: &Arc<Env>, read_only: bool) -> Result<Arc<Self>, Errors> {
-        let env_mut_ref: &mut Env = unsafe {
-            &mut *(Arc::into_raw(env.clone()) as *mut Env)
-        };
+impl<'a> Txn<'a> {
+    pub fn new(env: &'a Arc<Env<'a>>, read_only: bool) -> Result<Arc<Self>, Errors> {
+        //let env_mut_ref: &mut Env = unsafe {
+            //&mut *(Arc::into_raw(env.clone()) as *mut Env)
+        //};
         if !read_only {
             debug!("try to lock write_mutex");
-            while env_mut_ref.txn_info.as_mut().unwrap().write_mutex.compare_exchange(0, 1, Ordering::Relaxed, Ordering::Relaxed).is_err() {
+            //while env_mut_ref.txn_info.as_mut().unwrap().write_mutex.compare_exchange(0, 1, Ordering::Relaxed, Ordering::Relaxed).is_err() {
                 
-            }
+            //}
+            let mutex_guard = env.txn_info.as_ref().unwrap().write_mutex.lock().unwrap();
             debug!("write_mutex unlocked");
 
-            env_mut_ref.txn_info.as_mut().unwrap().txn_id += 1;
-            assert!(env_mut_ref.w_txn.is_none());
+            unsafe {
+                let env_ptr = Arc::as_ptr(env) as *mut Env;
+                (*env_ptr).txn_info.as_mut().unwrap().txn_id += 1;
+                (*env_ptr).env_read_meta()?;
+            }
+
+            assert!(env.w_txn.is_none());
             
             //always read metadata before begin a new transaction
             //read metadata also won't affect read transactions because of toggle meta pages. 
-            env_mut_ref.env_read_meta()?;
 
             let txn: Arc<Self> = Arc::new(Self {
-                txn_id: env_mut_ref.txn_info.as_ref().unwrap().txn_id,
-                txn_root: env_mut_ref.env_meta.as_ref().unwrap().root,
-                txn_next_pgno: env_mut_ref.env_meta.as_ref().unwrap().last_page+1,
-                txn_first_pgno: env_mut_ref.env_meta.as_ref().unwrap().last_page+1,
+                txn_id: env.txn_info.as_ref().unwrap().txn_id,
+                txn_root: Mutex::new(env.env_meta.as_ref().unwrap().root),
+                txn_next_pgno: Mutex::new(env.env_meta.as_ref().unwrap().last_page+1),
+                txn_first_pgno: Mutex::new(env.env_meta.as_ref().unwrap().last_page+1),
                 env: env.clone(),
+                write_lock: Some(mutex_guard),
                 u: unit {
                     dirty_queue: mem::ManuallyDrop::new(VecDeque::new())
                 },
-                flags: 0
+                flags: Mutex::new(0)
             });
 
-            env_mut_ref.w_txn = Some(Arc::downgrade(&txn));
+            //env_mut_ref.w_txn = Some(Arc::downgrade(&txn));
+            unsafe {
+                (*(Arc::as_ptr(env) as *mut Env)).w_txn = Some(Arc::downgrade(&txn));
+            }
 
-            debug!("begin a write transaction {} on root {}", &txn.txn_id, &txn.txn_root);
+            debug!("begin a write transaction {} on root {}", &txn.txn_id, *txn.txn_root.lock().unwrap());
             Ok(txn)
         } else {
             //I don't find pthread_get_specific like function in rust,
             //so we have to iterate all readers to make sure that this is a new thread.
             let reader = {
-                let readers = &mut env_mut_ref.txn_info.as_mut().unwrap().readers;
+                let readers = unsafe {&mut (*(Arc::as_ptr(env) as *mut Env)).txn_info.as_mut().unwrap().readers};
                 let mut i: usize = 0;
                 //let read_guard = env_mut_ref.txn_info.as_mut().unwrap().read_mutex.lock().unwrap();
                 for i in 0..consts::MAX_READERS {
@@ -537,24 +546,27 @@ impl Txn {
                 readers[i]
             };
 
-            env_mut_ref.env_read_meta()?;
+            unsafe {
+                (*(Arc::as_ptr(env) as *mut Env)).env_read_meta()?;
+            }
 
-            let txn_info = env_mut_ref.txn_info.as_ref().unwrap();
-            let env_meta = env_mut_ref.env_meta.as_ref().unwrap();
+            let txn_info = env.txn_info.as_ref().unwrap();
+            let env_meta = env.env_meta.as_ref().unwrap();
 
             let txn = Arc::new(Self {
                 txn_id: txn_info.txn_id,
-                txn_root: env_meta.root,
-                txn_next_pgno: env_meta.last_page,
-                txn_first_pgno: env_meta.last_page,
+                txn_root: Mutex::new(env_meta.root),
+                txn_next_pgno: Mutex::new(env_meta.last_page),
+                txn_first_pgno: Mutex::new(env_meta.last_page),
                 env: env.clone(),
+                write_lock: None,
                 u: unit {
                     reader: reader
                 },
-                flags: consts::READ_ONLY,
+                flags: Mutex::new(consts::READ_ONLY),
             });
 
-            debug!("begin a read only transaction {} on root {}", &txn.txn_id, &txn.txn_root);
+            debug!("begin a read only transaction {} on root {}", &txn.txn_id, *txn.txn_root.lock().unwrap());
             Ok(txn)
         }
     }           
