@@ -10,3 +10,8 @@
 mod mdb;
 mod errors;
 mod macros;
+mod txn;
+mod consts;
+
+#[cfg(test)]
+mod tests;

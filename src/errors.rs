@@ -8,7 +8,6 @@
  **********************************************/
 
 use std::io;
-use memmap;
 
 #[derive(Debug)]
 pub enum Errors {
