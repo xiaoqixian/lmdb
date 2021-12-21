@@ -35,6 +35,7 @@ pub enum Errors {
     InvalidFlag(u32),
     UnexpectedNoneValue(String),
     UnmappedEnv,
+    ReadersMaxedOut,
 
     ///harmless errors
     EmptyFile,

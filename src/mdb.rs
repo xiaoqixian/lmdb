@@ -19,7 +19,7 @@ use std::os::unix::prelude::FileExt;
 use std::ptr::{self, NonNull};
 use std::alloc::{alloc, dealloc, Layout};
 use std::process;
-use lock_api;
+use std::fmt;
 
 use crate::{info, debug, error, jump_head, jump_head_mut};
 
@@ -54,6 +54,8 @@ mod consts {
     pub const READ_WRITE: u32 = 0x2;
     pub const CREATE: u32 = 0x4;
 
+    ///transaction flags
+    pub const READ_ONLY_TXN: u32 = 0x1;
     pub const MAX_READERS: usize = 126;
 }
 
@@ -71,11 +73,13 @@ struct Val {
  * optimized.
  */
 /// page bounds
+#[derive(Debug)]
 struct PageBounds {
     upper_bound: usize,
     lower_bound: usize,
 }
 
+#[derive(Debug)]
 struct PageHead {
     pageno: Pageno,
     page_flags: u32,
@@ -84,6 +88,7 @@ struct PageHead {
     overflow_pages: usize,
 }
 
+#[derive(Debug)]
 struct DBHead {
     version: u32,
     magic: u32,
@@ -124,6 +129,7 @@ struct DB {
     db_head: DBHead
 }
 
+#[derive(Debug)]
 struct Env<'a> {
     env_flags: u32,
     fd: Option<File>,
@@ -137,8 +143,10 @@ struct Env<'a> {
 /**
  * Information for managing transactions.
  */
+//#[derive(Debug)]
 struct TxnInfo {
     txn_id: u32, 
+    num_readers: usize,
     ///write transaction atomic value, only when the value is 0, the write transaction
     ///can be begined.
     write_mutex: Mutex<i32>,
@@ -150,18 +158,19 @@ union unit {
     dirty_queue: mem::ManuallyDrop<VecDeque<NonNull<*mut u8>>>,
     reader: Reader //Reader record read thread information
 }
+//#[derive(Debug)]
 struct Txn<'a> {
     txn_id: u32,
     txn_root: Mutex<Pageno>,
     txn_next_pgno: Mutex<Pageno>,
-    txn_first_pgno: Mutex<Pageno>,
+    txn_first_pgno: Pageno, //this field is immutable is whole transaction lifetime, so don't need lock
     env: Arc<Env<'a>>,
     write_lock: Option<MutexGuard<'a, i32>>,
     u: unit, //if a write transaction, it's dirty_queue; if a read transaction, it's Reader
-    flags: Mutex<u32>
+    flags: u32
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 struct Reader {
     tid: thread::ThreadId,
     pid: u32,
@@ -186,11 +195,22 @@ impl DB {
     
 }
 
+impl fmt::Debug for TxnInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TxnInfo")
+            .field("txn_id", &self.txn_id)
+            .field("num_readers", &self.num_readers)
+            .field("write_mutex", &self.write_mutex)
+            .field("read_mutex", &self.read_mutex)
+            .finish()
+    }
+}
+
 impl Env<'_> {
     /**
      * create a new environment
      */
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             env_flags: 0,
             fd: None,
@@ -206,6 +226,7 @@ impl Env<'_> {
             env_meta: None,//later to read in with env_open().
             txn_info: Some(TxnInfo {
                 txn_id: 0,
+                num_readers: 0,
                 write_mutex: Mutex::new(0),
                 read_mutex: Mutex::new(0),
                 readers: [Reader {tid: thread::current().id(), pid: 0}; consts::MAX_READERS] //if reader is null identified by pid.
@@ -217,7 +238,7 @@ impl Env<'_> {
      * Open a database file.
      * Create mode: create database if not exist.
      */
-    fn env_open(&mut self, path: &str, flags: u32, mode: u32) -> Result<(), Errors> {
+    pub fn env_open(&mut self, path: &str, flags: u32, mode: u32) -> Result<(), Errors> {
         if mode & consts::READ_ONLY != 0 && mode & consts::READ_WRITE != 0 {
             return Err(Errors::InvalidFlag(mode));
         }
@@ -226,7 +247,7 @@ impl Env<'_> {
         let write = mode & consts::READ_WRITE != 0;
         let create = mode & consts::CREATE != 0;
 
-        let mut fd = match OpenOptions::new()
+        let fd = match OpenOptions::new()
             .read(read)
             .write(write)
             .create(create)
@@ -265,8 +286,8 @@ impl Env<'_> {
             }
         }
 
-        /// as memmap doesn't allow 0-length file mapped
-        /// so init a file first if creating a new env
+        // as memmap doesn't allow 0-length file mapped
+        // so init a file first if creating a new env
         if new_env {
             debug!("Creating new database file: {}", path);
             self.env_write_header()?;
@@ -274,8 +295,6 @@ impl Env<'_> {
 
             self.env_init_meta()?;
         }
-
-        self.env_read_meta()?;
 
         self.mmap = Some(unsafe {
             match memmap::MmapMut::map_mut(self.fd.as_ref().unwrap()) {
@@ -285,6 +304,10 @@ impl Env<'_> {
                 Ok(v) => v
             }
         });
+
+        debug!("mapped length: {}", self.mmap.as_ref().unwrap().len());
+
+        self.env_read_meta()?;
 
         Ok(())
     }
@@ -314,7 +337,7 @@ impl Env<'_> {
         let page_ptr: *const u8 = buf.as_ptr();
 
         let head_page: &PageHead = unsafe {&*(page_ptr as *const PageHead)};
-        assert!(head_page.page_flags & consts::P_HEAD == 0);
+        assert!(head_page.page_flags & consts::P_HEAD != 0);
 
         //let header: &DBHead = unsafe { // header of database
             //&*(page_ptr.offset(size_of::<Page>() as isize) as *const DBHead)
@@ -337,24 +360,34 @@ impl Env<'_> {
      * When creating a new env, need to write a header to file first before mapping.
      */
     fn env_write_header(&mut self) -> Result<(), Errors> {
-        let head = DBHead {
-            version: consts::VERSION,
-            magic: consts::MAGIC,
-            flags: 0,
-            page_size: consts::PAGE_SIZE,
-            mapsize: 0
-        };
-        
-        let head_buf = unsafe {
-            std::slice::from_raw_parts(&head as *const _ as *const u8, size_of::<DBHead>())
-        };
+        let mut head_buf = [0 as u8; consts::PAGE_SIZE];
+        //init page head
+        unsafe {
+            let page = &mut *(head_buf.as_mut_ptr() as *mut PageHead);
+            page.pageno = 0;
+            page.page_flags = consts::P_HEAD;
+            page.page_bounds = PageBounds {
+                upper_bound: 0,
+                lower_bound: 0
+            };
+            page.overflow_pages = 0;
+        }
+
+        unsafe {
+            let head = &mut *(head_buf.as_mut_ptr().offset(size_of::<PageHead>() as isize) as *mut DBHead);
+            head.version = consts::VERSION;
+            head.magic = consts::MAGIC;
+            head.flags = 0;
+            head.page_size = consts::PAGE_SIZE;
+            head.mapsize = 0;
+        }
 
         match self.fd.as_ref().unwrap().write_at(head_buf.as_ref(), 0) {
             Err(e) => {
                 return Err(Errors::StdWriteError(e));
             },
             Ok(write_size) => {
-                if write_size < size_of::<DBHead>() {
+                if write_size < head_buf.len() {
                     return Err(Errors::ShortWrite(write_size));
                 }
             }
@@ -440,6 +473,8 @@ impl Env<'_> {
     fn env_read_meta(&mut self) -> Result<(), Errors> {
         let page_ptr1 = self.get_page(1)?;
         let page_ptr2 = self.get_page(2)?;
+        debug!("page_ptr1: {:?}", page_ptr1);
+        debug!("page_ptr2: {:?}", page_ptr2);
         
         let page1: &PageHead = unsafe {
             &*(page_ptr1 as *const PageHead)
@@ -454,6 +489,9 @@ impl Env<'_> {
         let meta1: &DBMetaData = jump_head!(page_ptr1, DBMetaData);
         let meta2: &DBMetaData = jump_head!(page_ptr2, DBMetaData);
 
+        debug!("meta1: {:?}", meta1);
+        debug!("meta2: {:?}", meta2);
+
         self.env_meta = Some(
             if meta2.last_txn_id > meta1.last_txn_id {
                 debug!("Using meta page 2");
@@ -467,15 +505,19 @@ impl Env<'_> {
     }
 
     pub fn get_page(&mut self, pageno: Pageno) -> Result<*mut u8, Errors> {
+        let mut dirty_page = false;
         if self.w_txn.is_some() {
-            let dirty_page = match self.w_txn.as_ref().unwrap().upgrade() {
+            dirty_page = match self.w_txn.as_ref().unwrap().upgrade() {
                 None => {
                     panic!("env write transaction is some but dropped");
                 },
                 Some(v) => {
-                    pageno >= *v.txn_first_pgno.lock().unwrap()
+                    pageno >= v.txn_first_pgno
                 }
             };
+        } 
+        
+        if dirty_page {
             Ok(ptr::null_mut()) //temporary
         } else {
             let map_ptr: *mut u8 = self.mmap.as_mut().unwrap().as_mut().as_mut_ptr();
@@ -485,6 +527,25 @@ impl Env<'_> {
     }
 }
 
+
+impl std::fmt::Debug for Txn<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Txn")
+            .field("txn_id", &self.txn_id)
+            .field("txn_root", &self.txn_root)
+            .field("txn_next_pgno", &self.txn_next_pgno)
+            .field("txn_first_pgno", &self.txn_first_pgno)
+            .field("env", &self.env)
+            .field("write_lock", &self.write_lock)
+            .field("u", unsafe {if self.flags & consts::READ_ONLY_TXN == 0 {
+                &self.u.dirty_queue
+            } else {
+                &self.u.reader
+            }})
+            .field("flags", &self.flags)
+            .finish()
+    }
+}
 
 impl<'a> Txn<'a> {
     pub fn new(env: &'a Arc<Env<'a>>, read_only: bool) -> Result<Arc<Self>, Errors> {
@@ -514,13 +575,13 @@ impl<'a> Txn<'a> {
                 txn_id: env.txn_info.as_ref().unwrap().txn_id,
                 txn_root: Mutex::new(env.env_meta.as_ref().unwrap().root),
                 txn_next_pgno: Mutex::new(env.env_meta.as_ref().unwrap().last_page+1),
-                txn_first_pgno: Mutex::new(env.env_meta.as_ref().unwrap().last_page+1),
+                txn_first_pgno: env.env_meta.as_ref().unwrap().last_page+1,
                 env: env.clone(),
                 write_lock: Some(mutex_guard),
                 u: unit {
                     dirty_queue: mem::ManuallyDrop::new(VecDeque::new())
                 },
-                flags: Mutex::new(0)
+                flags: 0
             });
 
             //env_mut_ref.w_txn = Some(Arc::downgrade(&txn));
@@ -537,37 +598,70 @@ impl<'a> Txn<'a> {
                 let readers = unsafe {&mut (*(Arc::as_ptr(env) as *mut Env)).txn_info.as_mut().unwrap().readers};
                 let mut i: usize = 0;
                 //let read_guard = env_mut_ref.txn_info.as_mut().unwrap().read_mutex.lock().unwrap();
-                for i in 0..consts::MAX_READERS {
+                while i < consts::MAX_READERS {
                     if readers[i].pid == 0 {
                         readers[i].pid = process::id();
                         readers[i].tid = thread::current().id();
+                        break;
                     }
+                    i += 1;
                 }
+                
+                if i == consts::MAX_READERS {
+                    return Err(Errors::ReadersMaxedOut);
+                }
+
                 readers[i]
             };
+            debug!("get reader: {:?}", reader);
 
             unsafe {
+                debug!("env: {:?}", env);
                 (*(Arc::as_ptr(env) as *mut Env)).env_read_meta()?;
             }
+            debug!("read meta data: {:?}", env.env_meta.as_ref());
 
             let txn_info = env.txn_info.as_ref().unwrap();
             let env_meta = env.env_meta.as_ref().unwrap();
+
+            debug!("what now?");
 
             let txn = Arc::new(Self {
                 txn_id: txn_info.txn_id,
                 txn_root: Mutex::new(env_meta.root),
                 txn_next_pgno: Mutex::new(env_meta.last_page),
-                txn_first_pgno: Mutex::new(env_meta.last_page),
+                txn_first_pgno: env_meta.last_page,
                 env: env.clone(),
                 write_lock: None,
                 u: unit {
-                    reader: reader
+                    reader,
                 },
-                flags: Mutex::new(consts::READ_ONLY),
+                flags: consts::READ_ONLY_TXN,
             });
 
             debug!("begin a read only transaction {} on root {}", &txn.txn_id, *txn.txn_root.lock().unwrap());
             Ok(txn)
         }
-    }           
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::{Txn, Env};
+    use std::sync::{Arc};
+    use crate::errors::Errors;
+    use super::consts;
+    #[test]
+    fn test1() -> Result<(), Errors> {
+        let mut env_raw = Env::new();
+        env_raw.env_open(&"test.db", 0, consts::READ_WRITE | consts::CREATE)?;
+
+        let env = Arc::new(env_raw);
+        
+        let w_txn1 = Txn::new(&env, false)?;
+        let r_txn1 = Txn::new(&env, true)?;
+        let w_txn2 = Txn::new(&env, false)?;
+        Ok(())
+    }
 }
