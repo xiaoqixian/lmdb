@@ -1,18 +1,12 @@
 /**********************************************
-  > File Name		: lib.rs
+  > File Name		: cursor.rs
   > Author		    : lunar
   > Email			: lunar_ubuntu@qq.com
-  > Created Time	: Thu 16 Dec 2021 04:51:02 PM CST
+  > Created Time	: Wed 22 Dec 2021 11:24:15 AM CST
   > Location        : Shanghai
   > Copyright@ https://github.com/xiaoqixian
  **********************************************/
 
-mod mdb;
-mod errors;
-mod macros;
-mod txn;
-mod cursor;
-mod consts;
+pub struct Cursor {
 
-#[cfg(test)]
-mod tests;
+}

@@ -52,7 +52,7 @@ macro_rules! error {
     ($string: expr) => {
         colour::red!("[ERROR {}:{}] {}", file!(), line!(), $string);
     };
-    ($string: expr, $($formats: expr)*) => {
+    ($string: expr, $($formats: tt)*) => {
         let s = format!($string, $($formats)*);
         colour::red!("[ERROR {}:{}] {}", file!(), line!(), s);
     }
@@ -70,24 +70,43 @@ macro_rules! error {
  */
 #[macro_export]
 macro_rules! jump_head {
-    ($ptr: expr, $type: ty) => {
+    ($ptr: expr, $head: ty, $to: ty) => {
         unsafe {
-            &*($ptr.offset(size_of::<PageHead>() as isize) as *const $type)
+            &*($ptr.offset(size_of::<$head>() as isize) as *const $to)
         }
     }
 }
 
 #[macro_export]
 macro_rules! jump_head_mut {
-    ($ptr: expr, $type: ty) => {
+    ($ptr: expr, $head: ty, $to: ty) => {
         unsafe {
-            &mut *($ptr.offset(size_of::<PageHead>() as isize) as *mut $type)
+            &mut *($ptr.offset(size_of::<$head>() as isize) as *mut $to)
         }
     }
 }
 
+
 macro_rules! offset_of {
     ($ty:ty, $field:ident) => {
         unsafe {&(*(0 as *const $ty)).$field as *const _ as isize}
+    }
+}
+
+#[macro_export]
+macro_rules! ptr_ref {
+    ($ptr: ident, $type: ty) => {
+        unsafe {
+            &*($ptr as *const $type)
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! ptr_mut_ref {
+    ($ptr: ident, $type: ty) => {
+        unsafe {
+            &mut *($ptr as *mut $type)
+        }
     }
 }

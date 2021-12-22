@@ -29,6 +29,8 @@ pub const READ_ONLY: u32 = 0x1;
 pub const READ_WRITE: u32 = 0x2;
 pub const CREATE: u32 = 0x4;
 
-///transaction flags
+///transaction flags and consts
 pub const READ_ONLY_TXN: u32 = 0x1;
+///flags greater than 0x80000000 means transaction have errors
+pub const TXN_BROKEN: u32 = 0x80000000;
 pub const MAX_READERS: usize = 126;

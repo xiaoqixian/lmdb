@@ -278,3 +278,15 @@ In the program, we hope a transaction and the environment it belongs to are able
 But hey, this is in Rust, you can't just put references in a struct and think you can get the variable it refers whenever you want to. You have to decide both variables' lifetimes. Here, when a transaction is valid, it must have a valid environment belonged to. So we put a strong reference count of environment in a transaction, and as it's in multiple-threads, we use `Arc`, so the environment variable can't be dropped as long as there's at least one thread exists. 
 
 And for the environment, it's OK if the write transaction it refers is dropped, cause we don't need it anymore. So `Weak` reference count is a perfect choice.
+
+#### How is the tree updated
+
+When we talk about update the tree, we are mostly talking about inserting a new key/value pair into the tree. Cause that's only when a clean page could be dirty. 
+
+When we need to insert data into a clean page, we don't just insert it into it. Instead, we touch a exact new page and make it dirty. And then we update the tree, but only for the current write transaction. Until the write transaction is committed, the tree will be updated for the whole database.
+
+To be more specific, first of all, the write transaction needs to touch a new root page, so other transactions will go though this new root page to search keys after the transaction is committed. 
+
+Then it just goes down the tree to reach a leaf page, and make it dirty and inserts a new key/value pair, and then goes up to readjust all branch pages along it's way. Readjustment means making them dirty and replace child page's page number. 
+
+So in a tree, all dirty pages are newly allocated, all clean pages are mapped by the operating system. We need to deallocate all dirty pages when the write transaction is committed or aborted to avoid memory leak. Yeah, even this is in rust, it's possible to have memory leak problems.

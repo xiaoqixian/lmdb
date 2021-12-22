@@ -35,7 +35,15 @@ pub enum Errors {
     UnexpectedNoneValue(String),
     UnmappedEnv,
     ReadersMaxedOut,
+    TryToPutInReadOnlyTxn,
+    InvalidKey(String),
+    KeyNull,
+    ValNull,
+    BrokenTxn(String),
+    ReadOnlyTxnNotAllowed,
+    InvalidPageType(String),
 
     ///harmless errors
     EmptyFile,
+    EmptyTree,
 }

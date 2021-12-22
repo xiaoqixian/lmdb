@@ -23,17 +23,59 @@ use std::fmt;
 use std::cell::{RefCell, Ref};
 
 use crate::consts;
-use crate::txn::{Txn, ReadTxnInfo, Reader, unit};
-use crate::{info, debug, error, jump_head, jump_head_mut};
+use crate::cursor::Cursor;
+use crate::txn::{Txn, ReadTxnInfo, Reader, unit, Val};
+use crate::{info, debug, error, jump_head, jump_head_mut, ptr_ref, ptr_mut_ref};
 
 pub type Pageno = usize;
-type Ptr = [u8];
-type Cmpfunc = fn(v1: Val, v2: Val) -> i32;
+pub type Indext = u16; //index of nodes in a node.
+type CmpFunc = fn(v1: Val, v2: Val) -> i32;
 
+struct Array<T> where T: Sized + Copy {
+    inner: *mut T
+}
 
-struct Val {
-    size: usize,
-    data: Ptr
+impl<T> Array<T> where T: Sized + Copy {
+    fn new(ptr: *mut u8) -> Self {
+        assert!(!ptr.is_null());
+        Self {
+            inner: ptr as *mut T
+        }
+    }
+}
+
+impl<T> std::ops::Index<usize> for Array<T> where T: Sized + Copy {
+    type Output = T;
+    fn index(&self, index: usize) -> &Self::Output {
+        unsafe {&*self.inner.offset(index as isize)}
+    }
+}
+
+/**
+ * return 1 if key1 greater than key2
+ * return -1 if key1 less than key2
+ * return 0 if key1 equals to key2
+ */
+fn default_compfunc(key1: Val, key2: Val) -> i32 {
+    let len = if key1.size < key2.size {key1.size} else {key2.size};
+    let val1 = unsafe {std::slice::from_raw_parts(key1.data, len)};
+    let val2 = unsafe {std::slice::from_raw_parts(key2.data, len)};
+
+    for i in 0..len {
+        if val1[i] < val2[i] {
+            return -1;
+        } else if val1[i] > val2[i] {
+            return 1;
+        }
+    }
+
+    if key1.size < key2.size {
+        return -1;
+    } else if key1.size > key2.size {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 /**
@@ -45,13 +87,13 @@ struct Val {
  * optimized.
  */
 /// page bounds
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 struct PageBounds {
     upper_bound: usize,
     lower_bound: usize,
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 struct PageHead {
     pageno: Pageno,
     page_flags: u32,
@@ -59,6 +101,42 @@ struct PageHead {
     /// size of overflow pages
     overflow_pages: usize,
 }
+
+/**
+ * A pair of page pointers.
+ * With a parent page and one of it's child page.
+ * And an index of the child page in the parent page.
+ */
+struct PageParent {
+    page: *mut u8,
+    parent: *mut u8,
+    index: usize
+}
+
+/**
+ * To present a dirty page or a group of dirty pages.
+ */
+struct DirtyPageHead {
+    parent: *mut u8,
+    index: usize, //index that this page in it's parent page.
+    num: usize, //number of allocated pages, this head not included.
+    layout: Layout //used for dirty page deallocation
+}
+
+/**
+ * Struct of nodes in the B+ tree.
+ */
+union PagenoDatasize {
+    pageno: Pageno,
+    datasize: usize
+}
+struct Node {
+    u: PagenoDatasize,
+    node_flags: u32,
+    key_size: usize,
+    key_data: *mut u8,
+}
+
 
 #[derive(Debug)]
 struct DBHead {
@@ -97,7 +175,7 @@ pub struct DBMetaData {
 
 struct DB {
     md_root: Pageno,
-    cmp_func: Cmpfunc,
+    cmp_func: CmpFunc,
     db_head: DBHead
 }
 
@@ -105,6 +183,7 @@ struct DB {
 pub struct Env<'a> {
     env_flags: u32,
     fd: Option<File>,
+    cmp_func: CmpFunc,
     mmap: Option<MmapMut>,
     w_txn: RefCell<Option<Weak<Txn<'a>>>>, //current write transaction
     env_head: Option<DBHead>,
@@ -115,6 +194,119 @@ pub struct Env<'a> {
     w_txn_first_page: Option<RwLock<Pageno>>
 }
 
+
+impl PageHead {
+    pub fn new(pageno: Pageno) -> Self {
+        Self {
+            pageno,
+            page_flags: 0,
+            page_bounds: PageBounds {
+                lower_bound: size_of::<PageHead>(),
+                upper_bound: consts::PAGE_SIZE
+            },
+            overflow_pages: 0
+        }
+    }
+
+    pub fn get_page_head(page_ptr: *mut u8) -> Self {
+        assert!(!page_ptr.is_null());
+        unsafe {
+            *(page_ptr as *const Self)
+        }
+    }
+
+    pub fn get_pageno(page_ptr: *mut u8) -> Pageno {
+        assert!(!page_ptr.is_null());
+        unsafe {
+            (*(page_ptr as *const Self)).pageno
+        }
+    }
+
+    pub fn is_set(page_ptr: *mut u8, flag: u32) -> bool {
+        assert!(!page_ptr.is_null());
+        unsafe {
+            (*(page_ptr as *const Self)).page_flags & flag != 0
+        }
+    }
+
+    pub fn get_flags(page_ptr: *mut u8) -> u32 {
+        assert!(!page_ptr.is_null());
+        unsafe {
+            (*(page_ptr as *const Self)).page_flags
+        }
+    }
+
+    pub fn get_info(page_ptr: *mut u8) -> String {
+        assert!(!page_ptr.is_null());
+        let page = unsafe {&*(page_ptr as *const PageHead)};
+        String::from(format!("Page {{ pageno: {}, flags: {:#X}, lower_bound: {}, upper_bound: {}, overflow_pages: {}  }}", page.pageno, page.page_flags, page.page_bounds.lower_bound, page.page_bounds.upper_bound, page.overflow_pages))
+    }
+
+    pub fn num_keys(page_ptr: *mut u8) -> usize {
+        let lower_bound = unsafe {*(page_ptr as *const PageHead)}.page_bounds.lower_bound;
+        (lower_bound - size_of::<PageHead>()) >> 1 //because ptr index length is 2 bytes.
+    }
+
+    /**
+     * update a child page number for a branch page.
+     */
+    pub fn update_child(parent: *mut u8, pageno: Pageno, index: usize) -> Result<(), Errors> {
+        if !Self::is_set(parent, consts::P_BRANCH) {
+            return Err(Errors::InvalidPageType(PageHead::get_info(parent)));
+        }
+
+        //let node_offset = unsafe {*(parent.offset((size_of::<PageHead>() + index*size_of::<Indext>()) as isize) as *const Indext) as isize};
+        let node_offset = Array::new::<Indext>(parent)[index] as isize;
+        debug!("child node offset {}", node_offset);
+        let node = unsafe {&mut *(parent.offset(node_offset) as *mut Node)};
+        node.u.pageno = pageno;
+        Ok(())
+    }
+
+    /**
+     * search a node in a page by a key.
+     * as all nodes are sorted, we use binary search.
+     *
+     * @return (index, exact): exact means if this key is a exact compare, if is, then
+     * there is already a exactly same key exists in this page already.
+     * If the key is greater than all child nodes in this page, then return Ok(None).
+     */
+    pub fn search_node(page_ptr: *mut u8, key: Val, cmp_func: &CmpFunc) -> Result<Option<(usize, bool)>, Errors> {
+        let mut low: usize = if PageHead::is_set(page_ptr, consts::P_LEAF) {0} else {1};
+        let mut high: usize = PageHead::num_keys(page_ptr) - 1;
+        let mut mid: usize;
+        let mut cmp_res: i32;
+        let node_offsets = Array::new::<Indext>(page_ptr):
+
+        while low <= high {
+            mid = (low+high) >> 1;
+            let mid_node = unsafe {&*(page_ptr.offset(node_offsets[mid] as isize) as *const Node)};
+            let mid_key = Val::new(mid_node.key_size, mid_node.key_data);
+            
+            cmp_res = cmp_func()
+        }
+    }
+}
+
+impl fmt::Debug for PageParent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("PageParent")
+            .field("page", &PageHead::get_pageno(self.page))
+            .field("parent", &PageHead::get_pageno(self.parent))
+            .field("index", &self.index)
+            .finish()
+    }
+}
+
+impl PageParent {
+    pub fn new() -> Self {
+        Self {
+            page: ptr::null_mut(),
+            parent: ptr::null_mut(),
+            index: std::usize::MAX
+        }
+    }
+}
 
 impl DBStat {
     fn new() -> Self {
@@ -155,6 +347,7 @@ impl Env<'_> {
         Self {
             env_flags: 0,
             fd: None,
+            cmp_func: default_compfunc,
             mmap: None,
             w_txn: RefCell::new(None),
             env_head: Some(DBHead::new()),
@@ -314,7 +507,7 @@ impl Env<'_> {
         //let header: &DBHead = unsafe { // header of database
             //&*(page_ptr.offset(size_of::<Page>() as isize) as *const DBHead)
         //};
-        let header: &DBHead = jump_head!(page_ptr, DBHead);
+        let header: &DBHead = jump_head!(page_ptr, PageHead, DBHead);
 
         if header.version > consts::VERSION {
             return Err(Errors::InvalidVersion(header.version));
@@ -396,8 +589,8 @@ impl Env<'_> {
         page2.pageno = 2;
         page2.page_flags = consts::P_META;
 
-        let meta1: &mut DBMetaData = jump_head_mut!(page_ptr1, DBMetaData);
-        let meta2: &mut DBMetaData = jump_head_mut!(page_ptr2, DBMetaData);
+        let meta1: &mut DBMetaData = jump_head_mut!(page_ptr1, PageHead, DBMetaData);
+        let meta2: &mut DBMetaData = jump_head_mut!(page_ptr2, PageHead, DBMetaData);
 
         meta1.db_stat = DBStat {
             page_size: self.env_head.as_ref().unwrap().page_size,
@@ -458,8 +651,8 @@ impl Env<'_> {
         };
         assert!(page2.page_flags & consts::P_META != 0);
 
-        let meta1: &DBMetaData = jump_head!(page_ptr1, DBMetaData);
-        let meta2: &DBMetaData = jump_head!(page_ptr2, DBMetaData);
+        let meta1: &DBMetaData = jump_head!(page_ptr1, PageHead, DBMetaData);
+        let meta2: &DBMetaData = jump_head!(page_ptr2, PageHead, DBMetaData);
 
         debug!("meta1: {:?}", meta1);
         debug!("meta2: {:?}", meta2);
@@ -485,6 +678,142 @@ impl Env<'_> {
             let map_ptr: *mut u8 = self.mmap.as_ref().unwrap().as_ptr() as *mut u8;
             let page_size = self.env_head.as_ref().unwrap().page_size;
             Ok(unsafe {map_ptr.offset((pageno * page_size) as isize)})
+        }
+    }
+
+    /**
+     * allocate @num number of new pages.
+     * ONLY way pages can be allocated.
+     * pages deallocated when the write transaction is committed.
+     */
+    fn allocate_page(&self, num: usize, parent: *mut u8, index: usize, txn: &Txn) -> Result<*mut u8, Errors> {
+        let layout = match Layout::from_size_align(num * self.env_head.unwrap().page_size + size_of::<DirtyPageHead>(), 1) {
+            Err(e) => {
+                error!("Layout error {:?}", e);
+                return Err(Errors::LayoutError(e));
+            },
+            Ok(v) => v
+        };
+
+        let ptr: *mut u8 = unsafe {alloc(layout)};
+
+        let dpage_head: &mut DirtyPageHead = ptr_mut_ref!(ptr, DirtyPageHead);
+        
+        dpage_head.parent = parent;
+        dpage_head.num = num;
+        dpage_head.layout = layout;
+
+        let page: &mut PageHead = jump_head_mut!(ptr, DirtyPageHead, PageHead);
+        page.pageno = txn.get_next_pageno();
+        txn.add_next_pageno(num);
+
+        txn.add_dirty_page(ptr)?;
+        Ok(ptr)
+    }
+
+    /**
+     * allocate new page, 
+     * @param txn: as only provided only for the write transaction, a txn ref parameter 
+     * needed.
+     * @param flag: branch page or leaf page, used to update database stat information.
+     *
+     * @return Ok: a ptr includes DirtyPageHead and pages allocated returned in the form
+     * of *mut u8.
+     */
+    pub fn new_page(&self, txn: &Txn, flag: u32, num: usize) -> Result<*mut u8, Errors> {
+        if txn.get_txn_flags() & consts::READ_ONLY_TXN != 0 {
+            return Err(Errors::ReadOnlyTxnNotAllowed);
+        }
+
+        let ptr = self.allocate_page(num, ptr::null_mut(), 0, txn);
+        Ok(ptr) //temporary
+    }
+
+    /**
+     * touch a page and make it dirty
+     * page_parent is a mutable reference and it got updated.
+     */
+    pub fn touch(&self, page_parent: &mut PageParent, txn: &Txn) -> Result<(), Errors> {
+        assert!(!page_parent.page.is_null());
+        
+        if !PageHead::is_set(page_parent.page, consts::P_DIRTY) {
+            debug!("touching page {} -> {}", PageHead::get_pageno(page_parent.page), txn.get_next_pageno());
+            let dpage_ptr = self.allocate_page(1, page_parent.parent, page_parent.index, txn)?;
+            
+            let new_pageno = jump_head!(dpage_ptr, DirtyPageHead, PageHead).pageno;
+            
+            unsafe {
+                ptr::copy::<u8>(page_parent.page, dpage_ptr.offset(size_of::<DirtyPageHead>() as isize), self.env_head.unwrap().page_size);
+            }
+
+            let new_page = jump_head_mut!(dpage_ptr, DirtyPageHead, PageHead);
+            new_page.pageno = new_pageno;
+            new_page.page_flags |= consts::P_DIRTY;
+
+            //update new page in it's parent
+            if !page_parent.parent.is_null() {
+                PageHead::update_child(page_parent.parent, new_pageno, page_parent.index)?;
+            }
+
+            page_parent.page = new_page as *mut _ as *mut u8;
+        }
+        Ok(())
+    }
+
+    /**
+     * search_page: search a page buy a key.
+     * @param modify: if we set modify and the page we searched is not dirty yet, then 
+     * we should touch a new page to replace it. 
+     */
+    pub fn search_page(&self, key: Val, txn: Option<&Txn>, cursor: Option<&Cursor>, modify: bool) -> Result<PageParent, Errors> {
+        let root: Pageno = {
+            if txn.is_none() {
+                if let Err(e) = self.env_read_meta() {
+                    return Err(e);
+                }
+                self.get_root_pageno()
+            } else if txn.unwrap().txn_flags >= consts::TXN_BROKEN {
+                return Err(Errors::BrokenTxn(String::from(format!("{:?}", txn))));
+            } else {
+                *txn.unwrap().txn_root.borrow()
+            }
+        };
+
+        let mut res = PageParent::new();
+
+        if root == consts::P_INVALID {
+            return Err(Errors::EmptyTree);
+        }
+
+        res.page = self.get_page(root)?;
+        debug!("root page with flags {:#X}", PageHead::get_flags(res.page));
+        
+        // if this is the first time the current write transaction modifies.
+        // touch a new root page 
+        if modify && !PageHead::is_set(res.page, consts::P_DIRTY) {
+            self.touch(&mut page_parent, txn.unwrap())?;
+            txn.unwrap().update_root(PageHead::get_pageno(page_parent.page))?;
+        }
+
+        self.search_page_root(key, txn, cursor, page_parent)
+    }
+
+    /**
+     * search a page from root page
+     * if key is None, it initilizes the cursor at the left most leaf node.
+     */
+    fn search_page_root(&self, key: Option<Val>, txn: Option<&Txn>, cursor: Option<&Cursor>, page_parent: PageParent) -> Result<(), Errors> {
+        //TODO: cursor needs to push a page here
+
+        let page = page_parent.page;
+        let mut i: usize = 0;
+        
+        while PageHead::is_set(page, consts::P_BRANCH) {
+            if key.is_none() {
+                i = 0;
+            } else {
+                
+            }
         }
     }
 }
