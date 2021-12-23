@@ -51,6 +51,12 @@ impl<T> std::ops::Index<usize> for Array<T> where T: Sized + Copy {
     }
 }
 
+impl<T> std::ops::IndexMut<usize> for Array<T> where T: Sized + Copy {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        unsafe {&mut *self.inner.offset(index as isize)}
+    }
+}
+
 /**
  * return 1 if key1 greater than key2
  * return -1 if key1 less than key2
@@ -88,13 +94,13 @@ fn default_compfunc(key1: &Val, key2: &Val) -> i32 {
  */
 /// page bounds
 #[derive(Copy, Clone, Debug)]
-struct PageBounds {
+pub struct PageBounds {
     upper_bound: usize,
     lower_bound: usize,
 }
 
 #[derive(Copy, Clone, Debug)]
-struct PageHead {
+pub struct PageHead {
     pageno: Pageno,
     page_flags: u32,
     page_bounds: PageBounds,
@@ -108,15 +114,15 @@ struct PageHead {
  * And an index of the child page in the parent page.
  */
 pub struct PageParent {
-    page: *mut u8,
-    parent: *mut u8,
-    index: usize
+    pub page: *mut u8,
+    pub parent: *mut u8,
+    pub index: usize
 }
 
 /**
  * To present a dirty page or a group of dirty pages.
  */
-struct DirtyPageHead {
+pub struct DirtyPageHead {
     parent: *mut u8,
     index: usize, //index that this page in it's parent page.
     num: usize, //number of allocated pages, this head not included.
@@ -127,12 +133,12 @@ struct DirtyPageHead {
  * Struct of nodes in the B+ tree.
  */
 #[derive(Clone, Copy)]
-union PagenoDatasize {
+pub union PagenoDatasize {
     pageno: Pageno,
     datasize: usize
 }
 #[derive(Clone, Copy)]
-struct Node {
+pub struct Node {
     u: PagenoDatasize,
     node_flags: u32,
     key_size: usize,
@@ -141,7 +147,7 @@ struct Node {
 
 
 #[derive(Debug)]
-struct DBHead {
+pub struct DBHead {
     version: u32,
     magic: u32,
     page_size: usize, // os memory page size, in C, got by sysconf(_SC_PAGE_SIZE)
@@ -224,6 +230,34 @@ impl PageHead {
         }
     }
 
+    pub fn get_lower_bound(page_ptr: *mut u8) -> usize {
+        assert!(!page_ptr.is_null());
+        unsafe {
+            (*(page_ptr as *const Self)).page_bounds.lower_bound
+        }
+    }
+
+    pub fn get_upper_bound(page_ptr: *mut u8) -> usize {
+        assert!(!page_ptr.is_null());
+        unsafe {
+            (*(page_ptr as *const Self)).page_bounds.upper_bound
+        }
+    }
+
+    pub fn set_lower_bound(page_ptr: *mut u8, lower_bound: usize) {
+        assert!(!page_ptr.is_null());
+        unsafe {
+            (*(page_ptr as *mut Self)).page_bounds.lower_bound = lower_bound;
+        }
+    }
+
+    pub fn set_upper_bound(page_ptr: *mut u8, upper_bound: usize) {
+        assert!(!page_ptr.is_null());
+        unsafe {
+            (*(page_ptr as *mut Self)).page_bounds.upper_bound = upper_bound;
+        }
+    }
+    
     pub fn is_set(page_ptr: *mut u8, flag: u32) -> bool {
         assert!(!page_ptr.is_null());
         unsafe {
@@ -275,11 +309,17 @@ impl PageHead {
         Ok(unsafe {*(page_ptr.offset(ptrs[index] as isize) as *const Node)})
     }
 
+    pub fn left_space(page_ptr: *mut u8) -> usize {
+        let page_head = unsafe {&*(page_ptr as *const PageHead)};
+        page_head.page_bounds.upper_bound - page_head.page_bounds.lower_bound
+    }
+
     /**
      * search a node in a page by a key.
      * as all nodes are sorted, we use binary search.
      *
-     * @return (index, exact): exact means if this key is a exact compare, if is, then
+     * @return (index, exact): index is the index of the smallest node greater than key, 
+     * exact means if this key is a exact compare, if is, then
      * there is already a exactly same key exists in this page already.
      * If the key is greater than all child nodes in this page, then return Ok(None).
      */
@@ -318,6 +358,87 @@ impl PageHead {
         }
 
         Ok(Some((mid as usize, cmp_res == 0)))
+    }
+
+    /**
+     * append a node to a page.
+     * If no room in this page, we need to split the page.
+     *
+     * If this is a branch page, then data is None.
+     * If this is a leaf page, then pageno is None.
+     */
+    pub fn add_node(page_ptr: *mut u8, key: &Val, data: Option<&Val>, pageno: Option<Pageno>, index: usize, flags: u32, txn: &Txn) -> Result<(), Errors> {
+        assert_ne!(data.is_none(), pageno.is_none());
+
+        let page_size = txn.env.env_head.unwrap().page_size;
+        //evaluate node size needed
+        let mut node_size = size_of::<Node>() + key.size;
+        if PageHead::is_set(page_ptr, consts::P_LEAF) {
+            assert!(data.is_some());
+            
+            if flags & consts::V_BIGDATA != 0 {
+                //big data put on overflow pages
+                node_size += size_of::<Pageno>();
+            } else if data.unwrap().size >= page_size/consts::MINKEYS {
+                let mut over_pages = data.unwrap().size + page_size - 1;
+                over_pages /= page_size;
+
+                let ofp = txn.env.new_page(txn, consts::P_OVERFLOW, over_pages)?;
+
+            }
+        }
+
+        match Self::search_node(page_ptr, key, &default_compfunc)? {
+            None => 
+        }
+        Ok(())
+    }
+
+    /**
+     * delete a node from a page.
+     * all nodes are aranged tightly.
+     */
+    pub fn del_node(page_ptr: *mut u8, index: usize) -> Result<(), Errors> {
+        let num_keys = Self::num_keys(page_ptr);
+        assert!(index < num_keys);
+
+        let mut node_offsets = Array::<Indext>::new(unsafe {page_ptr.offset(size_of::<PageHead>() as isize)});
+        let node = unsafe {*(page_ptr.offset(node_offsets[index] as isize) as *const Node)};
+        let node_offset = node_offsets[index];
+        let mut node_size = size_of::<Node>() + node.key_size;
+        if PageHead::is_set(page_ptr, consts::P_LEAF) {
+            if node.node_flags & consts::V_BIGDATA != 0 {
+                node_size += size_of::<Pageno>();
+            } else {
+                node_size += node.u.datasize;
+            }
+        }
+
+        //update all node addresses if necessary
+        let mut i: usize = 0;
+        let mut k: usize = 0;
+        while i < num_keys {
+            if i != index {
+                node_offsets[k] = node_offsets[i];
+                if node_offsets[k] < node_offset {
+                    node_offsets[k] += node_size as Indext;
+                }
+                k += 1;
+            }
+            i += 1;
+        }
+        
+        Self::set_lower_bound(page_ptr, Self::get_lower_bound(page_ptr) - size_of::<Indext>());
+
+        //move all nodes address smaller than this node up node size 
+        let upper_bound = Self::get_upper_bound(page_ptr);
+        unsafe {
+            ptr::copy(page_ptr.offset(upper_bound as isize), page_ptr.offset((upper_bound - node_size) as isize), node_offset as usize - node_size - upper_bound);
+        }
+
+        Self::set_upper_bound(page_ptr, upper_bound + node_size);
+
+        Ok(())
     }
 }
 
@@ -732,6 +853,8 @@ impl Env<'_> {
      * allocate @num number of new pages.
      * ONLY way pages can be allocated.
      * pages deallocated when the write transaction is committed.
+     *
+     * notice the difference between allocate_page and new_page.
      */
     fn allocate_page(&self, num: usize, parent: *mut u8, index: usize, txn: &Txn) -> Result<*mut u8, Errors> {
         let layout = match Layout::from_size_align(num * self.env_head.as_ref().unwrap().page_size + size_of::<DirtyPageHead>(), 1) {

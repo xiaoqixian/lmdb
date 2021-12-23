@@ -18,7 +18,7 @@ use std::cell::RefCell;
 
 use crate::consts;
 use crate::errors::Errors;
-use crate::mdb::{Env, Pageno};
+use crate::mdb::{Env, Pageno, PageHead};
 use crate::{debug};
 
 #[derive(Copy, Clone)]
@@ -232,7 +232,14 @@ impl<'a> Txn<'a> {
         *self.txn_root.borrow()
     }
 
-    pub fn txn_put(&mut self, key: Val, val: Val) -> Result<(), Errors> {
+    /**
+     * put a key/value pair into the database.
+     *
+     * flags could be 
+     *      K_OVERRITE: allow key overrite if key exists, if key exists and this flag not
+     *                  setted, return Err(KeyExist)
+     */
+    pub fn txn_put(&mut self, key: Val, val: Val, flags: u32) -> Result<(), Errors> {
         if self.txn_flags & consts::READ_ONLY_TXN != 0 {
             return Err(Errors::TryToPutInReadOnlyTxn);
         }
@@ -249,7 +256,21 @@ impl<'a> Txn<'a> {
         }
 
         match self.env.search_page(&key, Some(&self), None, true) {
-            Ok(v) => {
+            Ok(page_parent) => {
+                let insert_index = match PageHead::search_node(page_parent.page, &key, self.env.cmp_func)? {
+                    None => {
+                        PageHead::num_keys(page_parent.page) - 1
+                    },
+                    Some((index, exact)) => {
+                        if exact {
+                            if flags & consts::K_OVERRITE == 0 {
+                                return Err(Errors::KeyExist(format!("{:?}", &key)));
+                            }
+                            PageHead::del_node(page_parent.page, index)?;
+                        }
+                        index
+                    }
+                }
 
             },
             Err(Errors::EmptyTree) => {

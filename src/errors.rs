@@ -43,6 +43,7 @@ pub enum Errors {
     ReadOnlyTxnNotAllowed,
     InvalidPageType(String),
     IndexOverflow(usize),
+    KeyExist(String),
 
     Seldom(String), //hard to classify
 
