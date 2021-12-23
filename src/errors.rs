@@ -42,6 +42,9 @@ pub enum Errors {
     BrokenTxn(String),
     ReadOnlyTxnNotAllowed,
     InvalidPageType(String),
+    IndexOverflow(usize),
+
+    Seldom(String), //hard to classify
 
     ///harmless errors
     EmptyFile,

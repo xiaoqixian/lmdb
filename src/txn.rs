@@ -76,7 +76,7 @@ impl Val {
     /**
      * 
      */
-    fn get_readable_data<'a>(&self) -> [char; 10] {
+    pub fn get_readable_data(&self) -> [char; 10] {
         let mut res = [32 as char; 10];
         let len = if self.size < 10 {self.size} else {10};
         let data_ref = unsafe {std::slice::from_raw_parts(self.data as *const _, len)};
@@ -105,11 +105,13 @@ impl std::fmt::Debug for Txn<'_> {
             .field("txn_first_pgno", &self.txn_first_pgno)
             .field("env", &self.env)
             .field("write_lock", &self.write_lock)
-            .field("u", unsafe {if self.txn_flags & consts::READ_ONLY_TXN == 0 {
-                &self.u.borrow().dirty_queue
-            } else {
-                &self.u.borrow().reader
-            }})
+            .field("u", &unsafe {
+                if self.txn_flags & consts::READ_ONLY_TXN == 0 {
+                    String::from("dirty_queue")
+                } else {
+                    format!("{:?}", self.u.borrow().reader)
+                }
+            })
             .field("txn_flags", &self.txn_flags)
             .finish()
     }
@@ -205,7 +207,7 @@ impl<'a> Txn<'a> {
      * add a dirty page ptr to dirty_queue
      */
     pub fn add_dirty_page(&self, dpage_ptr: *mut u8) -> Result<(), Errors> {
-        self.u.borrow_mut().dirty_queue.push_back(NonNull::new(dpage_ptr).unwrap());
+        unsafe {self.u.borrow_mut().dirty_queue.push_back(NonNull::new(dpage_ptr).unwrap())};
         Ok(())
     }
 
@@ -226,6 +228,10 @@ impl<'a> Txn<'a> {
         Ok(())
     }
 
+    pub fn get_txn_root(&self) -> Pageno {
+        *self.txn_root.borrow()
+    }
+
     pub fn txn_put(&mut self, key: Val, val: Val) -> Result<(), Errors> {
         if self.txn_flags & consts::READ_ONLY_TXN != 0 {
             return Err(Errors::TryToPutInReadOnlyTxn);
@@ -242,7 +248,7 @@ impl<'a> Txn<'a> {
             return Err(Errors::ValNull);
         }
 
-        match self.env.search_page(key) {
+        match self.env.search_page(&key, Some(&self), None, true) {
             Ok(v) => {
 
             },
