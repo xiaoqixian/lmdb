@@ -45,7 +45,7 @@ pub struct Txn<'a> {
     txn_root: RefCell<Pageno>,
     txn_next_pgno: RefCell<Pageno>,
     txn_first_pgno: Pageno, //this field is immutable is whole transaction lifetime, so don't need lock
-    env: Arc<Env<'a>>,
+    pub env: Arc<Env<'a>>,
     write_lock: Option<MutexGuard<'a, i32>>,
     u: RefCell<unit>, //if a write transaction, it's dirty_queue; if a read transaction, it's Reader
     txn_flags: u32

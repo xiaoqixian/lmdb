@@ -44,6 +44,7 @@ pub enum Errors {
     InvalidPageType(String),
     IndexOverflow(usize),
     KeyExist(String),
+    NoSpace(String),
 
     Seldom(String), //hard to classify
 

@@ -7,6 +7,18 @@
   > Copyright@ https://github.com/xiaoqixian
  **********************************************/
 
+#[macro_export]
+macro_rules! function {
+    () => {{
+        fn f() {}
+        fn type_name_of<T>(_: T) -> &'static str {
+            std::any::type_name::<T>()
+        }
+        let name = type_name_of(f);
+        &name[..name.len() - 3]
+    }}
+}
+
 #[cfg(debug_assertions)]
 #[macro_export]
 macro_rules! info {
@@ -31,11 +43,11 @@ macro_rules! info {
 #[macro_export]
 macro_rules! debug {
     ($string: expr) => {
-        colour::yellow_ln!("[DEBUG {}:{}] {}", file!(), line!(), $string);
+        colour::yellow_ln!("[DEBUG {}:{}:{}] {}", file!(), crate::function!(), line!(), $string);
     };
     ($string: expr, $($formats: tt)*) => {
         let s = format!($string, $($formats)*);
-        colour::yellow_ln!("[DEBUG {}:{}] {}", file!(), line!(), s);
+        colour::yellow_ln!("[DEBUG {}:{}:{}] {}", file!(), crate::function!(), line!(), s);
     }
 }
 
@@ -50,11 +62,11 @@ macro_rules! debug {
 #[macro_export]
 macro_rules! error {
     ($string: expr) => {
-        colour::red!("[ERROR {}:{}] {}", file!(), line!(), $string);
+        colour::red!("[ERROR {}:{}:{}] {}", file!(), crate::function!(), line!(), $string);
     };
     ($string: expr, $($formats: tt)*) => {
         let s = format!($string, $($formats)*);
-        colour::red!("[ERROR {}:{}] {}", file!(), line!(), s);
+        colour::red!("[ERROR {}:{}:{}] {}", file!(), crate::function!(), line!(), s);
     }
 }
 

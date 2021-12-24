@@ -191,7 +191,7 @@ pub struct DBMetaData {
 pub struct Env<'a> {
     env_flags: u32,
     fd: Option<File>,
-    cmp_func: &'a CmpFunc,
+    pub cmp_func: &'a CmpFunc,
     mmap: Option<MmapMut>,
     w_txn: RefCell<Option<Weak<Txn<'a>>>>, //current write transaction
     env_head: Option<DBHead>,
@@ -362,14 +362,16 @@ impl PageHead {
 
     /**
      * append a node to a page.
-     * If no room in this page, we need to split the page.
+     * If no room in this page, we need to split the page, but it's the job of this function.
+     * So it just returns Err(Errors::NoSpace)
      *
      * If this is a branch page, then data is None.
      * If this is a leaf page, then pageno is None.
      */
-    pub fn add_node(page_ptr: *mut u8, key: &Val, data: Option<&Val>, pageno: Option<Pageno>, index: usize, flags: u32, txn: &Txn) -> Result<(), Errors> {
+    pub fn add_node(page_ptr: *mut u8, key: &Val, data: Option<&Val>, pageno: Option<Pageno>, index: usize, f: u32, txn: &Txn) -> Result<(), Errors> {
         assert_ne!(data.is_none(), pageno.is_none());
 
+        let mut flags = f; // as rust doesn't allow mutable paprameters
         let page_size = txn.env.env_head.unwrap().page_size;
         //evaluate node size needed
         let mut node_size = size_of::<Node>() + key.size;
@@ -384,13 +386,49 @@ impl PageHead {
                 over_pages /= page_size;
 
                 let ofp = txn.env.new_page(txn, consts::P_OVERFLOW, over_pages)?;
-
+                flags |= consts::V_BIGDATA;
+                node_size += size_of::<Pageno>();
+            } else {
+                node_size += data.unwrap().size;
             }
         }
 
-        match Self::search_node(page_ptr, key, &default_compfunc)? {
-            None => 
+        if node_size+size_of::<Indext>() >= Self::left_space(page_ptr) {
+            debug!("page no enough space for another node");
+            debug!("page_bounds: {:?}, node_size: {}", unsafe {*(page_ptr as *const Self)}.page_bounds, node_size);
+            return Err(Errors::NoSpace(format!("page_bounds: {:?}, node_size: {}", unsafe {*(page_ptr as *const Self)}.page_bounds, node_size)));
         }
+
+        let mut i = Self::num_keys(page_ptr);
+        let mut node_offsets = Array::<Indext>::new(unsafe {page_ptr.offset(size_of::<Self>() as isize)});
+        while i > index {
+            node_offsets[i] = node_offsets[i-1];
+            i -= 1;
+        }
+
+        let ofs = Self::get_upper_bound(page_ptr) - node_size;
+        node_offsets[index] = ofs as Indext;
+
+        let node = unsafe {&mut *(page_ptr.offset(ofs as isize) as *mut Node)};
+        node.key_size = key.size;
+        node.node_flags = flags;
+        node.key_data = unsafe {page_ptr.offset((ofs + size_of::<Node>()) as isize)};
+
+        //copy key data
+        unsafe {
+            ptr::copy_nonoverlapping(key.data, node.key_data, key.size);
+        }
+        
+        if PageHead::is_set(page_ptr, consts::P_LEAF) {
+            node.u.datasize = data.unwrap().size;
+            //copy val data
+            unsafe {
+                ptr::copy_nonoverlapping(data.unwrap().data, page_ptr.offset((ofs + size_of::<Node>() + key.size) as isize), data.unwrap().size);
+            }
+        } else {
+            node.u.pageno = pageno.unwrap();
+        }
+
         Ok(())
     }
 
