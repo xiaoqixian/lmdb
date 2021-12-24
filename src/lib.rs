@@ -13,6 +13,7 @@ mod macros;
 mod txn;
 mod cursor;
 mod consts;
+mod page;
 
 #[cfg(test)]
 mod tests;

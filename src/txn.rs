@@ -18,7 +18,8 @@ use std::cell::RefCell;
 
 use crate::consts;
 use crate::errors::Errors;
-use crate::mdb::{Env, Pageno, PageHead};
+use crate::mdb::{Env, Pageno};
+use crate::page::{PageHead};
 use crate::{debug};
 
 #[derive(Copy, Clone)]
@@ -270,8 +271,9 @@ impl<'a> Txn<'a> {
                         }
                         index
                     }
-                }
+                };
 
+                PageHead::add_node(page_parent.page, &key, Some(&val), None, insert_index, 0, &self)?;
             },
             Err(Errors::EmptyTree) => {
                 debug!("allocating a new root page");
