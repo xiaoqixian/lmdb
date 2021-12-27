@@ -21,6 +21,7 @@ use crate::errors::Errors;
 use crate::mdb::{Env, Pageno};
 use crate::page::{PageHead};
 use crate::{debug};
+use crate::flags::{TxnFlags, NodeFlags};
 
 #[derive(Copy, Clone)]
 pub struct Val {
@@ -49,7 +50,7 @@ pub struct Txn<'a> {
     pub env: Arc<Env<'a>>,
     write_lock: Option<MutexGuard<'a, i32>>,
     u: RefCell<unit>, //if a write transaction, it's dirty_queue; if a read transaction, it's Reader
-    txn_flags: u32
+    txn_flags: TxnFlags
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -107,10 +108,10 @@ impl std::fmt::Debug for Txn<'_> {
             .field("env", &self.env)
             .field("write_lock", &self.write_lock)
             .field("u", &unsafe {
-                if self.txn_flags & consts::READ_ONLY_TXN == 0 {
-                    String::from("dirty_queue")
-                } else {
+                if self.txn_flags.is_set(consts::READ_ONLY_TXN) {
                     format!("{:?}", self.u.borrow().reader)
+                } else {
+                    String::from("dirty_queue")
                 }
             })
             .field("txn_flags", &self.txn_flags)
@@ -170,7 +171,7 @@ impl<'a> Txn<'a> {
                 u: RefCell::new(unit {
                     dirty_queue: mem::ManuallyDrop::new(VecDeque::new())
                 }),
-                txn_flags: 0
+                txn_flags: TxnFlags::new(0)
             });
 
             env.set_w_txn(Some(Arc::downgrade(&txn)));
@@ -212,7 +213,7 @@ impl<'a> Txn<'a> {
         Ok(())
     }
 
-    pub fn get_txn_flags(&self) -> u32 {
+    pub fn get_txn_flags(&self) -> TxnFlags {
         self.txn_flags
     }
 
@@ -241,7 +242,7 @@ impl<'a> Txn<'a> {
      *                  setted, return Err(KeyExist)
      */
     pub fn txn_put(&mut self, key: Val, val: Val, flags: u32) -> Result<(), Errors> {
-        if self.txn_flags & consts::READ_ONLY_TXN != 0 {
+        if self.txn_flags.is_set(consts::READ_ONLY_TXN) {
             return Err(Errors::TryToPutInReadOnlyTxn);
         }
 
@@ -257,7 +258,7 @@ impl<'a> Txn<'a> {
         }
 
         match self.env.search_page(&key, Some(&self), None, true) {
-            Ok(page_parent) => {
+            Ok(mut page_parent) => {
                 let insert_index = match PageHead::search_node(page_parent.page, &key, self.env.cmp_func)? {
                     None => {
                         PageHead::num_keys(page_parent.page) - 1
@@ -273,11 +274,23 @@ impl<'a> Txn<'a> {
                     }
                 };
 
-                PageHead::add_node(page_parent.page, &key, Some(&val), None, insert_index, 0, &self)?;
+                match PageHead::add_node(page_parent.page, Some(&key), Some(&val), None, insert_index, NodeFlags::new(0), &self) {
+                    Ok(_) => {},
+                    Err(Errors::NoSpace(s)) => {
+                        debug!(s);
+                        //need to split the page.
+                        //page spliting also support inserting a new node.
+                        self.env.split(&mut page_parent, Some(&key), Some(&val), None, insert_index, 0, &self)?;
+                    },
+                    Err(e) => {
+                        return Err(e);
+                    }
+                }
             },
             Err(Errors::EmptyTree) => {
                 debug!("allocating a new root page");
-                
+                let root_ptr = self.env.new_page(&self, consts::P_LEAF, 1)?;
+
             },
             Err(e) => {
                 return Err(e)

@@ -17,6 +17,7 @@ use crate::txn::{Txn, Val};
 use crate::consts;
 use crate::errors::Errors;
 use crate::{debug, error, jump_head, jump_head_mut};
+use crate::flags::{PageFlags, NodeFlags};
 
 /**
  * Structure of a memory page.
@@ -36,7 +37,7 @@ pub struct PageBounds {
 #[derive(Copy, Clone, Debug)]
 pub struct PageHead {
     pub pageno: Pageno,
-    pub page_flags: u32,
+    pub page_flags: PageFlags,
     pub page_bounds: PageBounds,
     /// size of overflow pages
     pub overflow_pages: usize,
@@ -74,7 +75,7 @@ pub union PagenoDatasize {
 #[derive(Clone, Copy)]
 pub struct Node {
     pub u: PagenoDatasize,
-    pub node_flags: u32,
+    pub node_flags: NodeFlags,
     pub key_size: usize,
     pub key_data: *mut u8,
 }
@@ -84,7 +85,7 @@ impl PageHead {
     pub fn new(pageno: Pageno) -> Self {
         Self {
             pageno,
-            page_flags: 0,
+            page_flags: PageFlags::new(0),
             page_bounds: PageBounds {
                 lower_bound: size_of::<PageHead>(),
                 upper_bound: consts::PAGE_SIZE
@@ -135,14 +136,14 @@ impl PageHead {
         }
     }
     
-    pub fn is_set(page_ptr: *mut u8, flag: u32) -> bool {
+    pub fn is_set(page_ptr: *mut u8, flag: PageFlags) -> bool {
         assert!(!page_ptr.is_null());
         unsafe {
-            (*(page_ptr as *const Self)).page_flags & flag != 0
+            (*(page_ptr as *const Self)).page_flags.is_set(flag)
         }
     }
 
-    pub fn get_flags(page_ptr: *mut u8) -> u32 {
+    pub fn get_flags(page_ptr: *mut u8) -> PageFlags {
         assert!(!page_ptr.is_null());
         unsafe {
             (*(page_ptr as *const Self)).page_flags
@@ -244,20 +245,27 @@ impl PageHead {
      *
      * If this is a branch page, then data is None.
      * If this is a leaf page, then pageno is None.
+     *
+     * Also the key can be None, but only for branch pages and index has to be 0.
      */
-    pub fn add_node(page_ptr: *mut u8, key: &Val, val: Option<&Val>, pageno: Option<Pageno>, index: usize, f: u32, txn: &Txn) -> Result<(), Errors> {
+    pub fn add_node(page_ptr: *mut u8, key: Option<&Val>, val: Option<&Val>, pageno: Option<Pageno>, index: usize, f: NodeFlags, txn: &Txn) -> Result<(), Errors> {
         assert_ne!(val.is_none(), pageno.is_none());
+        assert_eq!(index == 0 && PageHead::is_set(page_ptr, consts::P_BRANCH), key.is_none());
 
         let mut flags = f; // as rust doesn't allow mutable paprameters
         let page_size = txn.env.get_page_size();
+        let key_size = match key {
+            None => 0,
+            Some(v) => v.size
+        };
         //evaluate node size needed
-        let mut node_size = size_of::<Node>() + key.size;
+        let mut node_size = size_of::<Node>() + key_size;
         let mut ofp: *mut u8 = ptr::null_mut();
 
         if PageHead::is_set(page_ptr, consts::P_LEAF) {
             assert!(val.is_some());
             
-            if flags & consts::V_BIGDATA != 0 {
+            if flags.is_set(consts::V_BIGDATA) {
                 //data already on overflow pages
                 //data in val is the page number.
                 node_size += size_of::<Pageno>();
@@ -273,7 +281,7 @@ impl PageHead {
             }
         }
 
-        if node_size+size_of::<Indext>() >= Self::left_space(page_ptr) {
+        if node_size + size_of::<Indext>() >= Self::left_space(page_ptr) {
             debug!("page no enough space for another node");
             debug!("page_bounds: {:?}, node_size: {}", unsafe {*(page_ptr as *const Self)}.page_bounds, node_size);
             return Err(Errors::NoSpace(format!("page_bounds: {:?}, node_size: {}", unsafe {*(page_ptr as *const Self)}.page_bounds, node_size)));
@@ -281,6 +289,8 @@ impl PageHead {
 
         let mut i = Self::num_keys(page_ptr);
         let mut node_offsets = Array::<Indext>::new(unsafe {page_ptr.offset(size_of::<Self>() as isize)});
+
+        //move all nodes after index up one slot.
         while i > index {
             node_offsets[i] = node_offsets[i-1];
             i -= 1;
@@ -290,25 +300,30 @@ impl PageHead {
         node_offsets[index] = ofs as Indext;
 
         let node = unsafe {&mut *(page_ptr.offset(ofs as isize) as *mut Node)};
-        node.key_size = key.size;
+        node.key_size = key_size;
         node.node_flags = flags;
-        node.key_data = unsafe {page_ptr.offset((ofs + size_of::<Node>()) as isize)};
+        node.key_data = match key {
+            None => ptr::null_mut(),
+            Some(v) => {
+                unsafe {
+                    let key_ptr = page_ptr.offset((ofs + size_of::<Node>()) as isize);
+                    ptr::copy_nonoverlapping(v.data, key_ptr, v.size);//copy key data to page.
+                    key_ptr
+                }
+            }
+        };
 
-        //copy key data
-        unsafe {
-            ptr::copy_nonoverlapping(key.data, node.key_data, key.size);
-        }
         
         if PageHead::is_set(page_ptr, consts::P_LEAF) {
-            if flags & consts::V_BIGDATA != 0 {
+            if flags.is_set(consts::V_BIGDATA) {
                 node.u.datasize = size_of::<Pageno>();
-                if f & consts::V_BIGDATA != 0 { //data already on overflow pages.
-                    unsafe { ptr::copy_nonoverlapping(val.unwrap().data, page_ptr.offset((ofs + size_of::<Node>() + key.size) as isize), val.unwrap().size); }
+                if f.is_set(consts::V_BIGDATA) {
+                    unsafe { ptr::copy_nonoverlapping(val.unwrap().data, page_ptr.offset((ofs + size_of::<Node>() + key.unwrap().size) as isize), val.unwrap().size); }
                 } else {
                     assert!(!ofp.is_null());
                     let page = jump_head!(ofp, DirtyPageHead, PageHead);
                     unsafe {
-                        ptr::copy_nonoverlapping(&page.pageno as *const _ as *const u8, page_ptr.offset((ofs + size_of::<Node>() + key.size) as isize), size_of::<Pageno>());
+                        ptr::copy_nonoverlapping(&page.pageno as *const _ as *const u8, page_ptr.offset((ofs + size_of::<Node>() + key.unwrap().size) as isize), size_of::<Pageno>());
 
                         //copy val data to overflow_pages
                         ptr::copy_nonoverlapping(val.unwrap().data, ofp.offset((size_of::<DirtyPageHead>() + size_of::<PageHead>()) as isize), val.unwrap().size);
@@ -318,7 +333,7 @@ impl PageHead {
                 node.u.datasize = val.unwrap().size;
                 //copy val data
                 unsafe {
-                    ptr::copy_nonoverlapping(val.unwrap().data, page_ptr.offset((ofs + size_of::<Node>() + key.size) as isize), val.unwrap().size);
+                    ptr::copy_nonoverlapping(val.unwrap().data, page_ptr.offset((ofs + size_of::<Node>() + key.unwrap().size) as isize), val.unwrap().size);
                 }
             }
 
@@ -342,7 +357,7 @@ impl PageHead {
         let node_offset = node_offsets[index];
         let mut node_size = size_of::<Node>() + node.key_size;
         if PageHead::is_set(page_ptr, consts::P_LEAF) {
-            if node.node_flags & consts::V_BIGDATA != 0 {
+            if node.node_flags.is_set(consts::V_BIGDATA) {
                 node_size += size_of::<Pageno>();
             } else {
                 node_size += unsafe {node.u.datasize};

@@ -45,6 +45,7 @@ pub enum Errors {
     IndexOverflow(usize),
     KeyExist(String),
     NoSpace(String),
+    InvalidParameters(String),
 
     Seldom(String), //hard to classify
 

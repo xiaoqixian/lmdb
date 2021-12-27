@@ -14,6 +14,7 @@ mod txn;
 mod cursor;
 mod consts;
 mod page;
+mod flags;
 
 #[cfg(test)]
 mod tests;

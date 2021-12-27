@@ -7,10 +7,10 @@
   > Copyright@ https://github.com/xiaoqixian
  **********************************************/
 
-use std::sync::{Arc, Weak, atomic::{AtomicU8, Ordering}, Mutex, MutexGuard, RwLock};
+use std::sync::{Arc, Weak, Mutex, MutexGuard, RwLock};
 use std::fs::{File, OpenOptions};
 use memmap::{self, MmapMut};
-use std::collections::{VecDeque};
+use std::collections::VecDeque;
 use std::thread;
 use std::mem::{self, size_of};
 use crate::errors::Errors;
@@ -27,6 +27,7 @@ use crate::cursor::Cursor;
 use crate::txn::{Txn, ReadTxnInfo, Reader, unit, Val};
 use crate::{info, debug, error, jump_head, jump_head_mut, ptr_ref, ptr_mut_ref};
 use crate::page::{PageHead, PageParent, PageBounds, DirtyPageHead};
+use crate::flags::{EnvFlags, PageFlags, NodeFlags};
 
 pub type Pageno = usize;
 pub type Indext = u16; //index of nodes in a node.
@@ -129,7 +130,7 @@ pub struct DBMetaData {
 
 //#[derive(Debug)]
 pub struct Env<'a> {
-    env_flags: u32,
+    env_flags: EnvFlags,
     fd: Option<File>,
     pub cmp_func: &'a CmpFunc,
     mmap: Option<MmapMut>,
@@ -192,7 +193,7 @@ impl Env<'_> {
      */
     pub fn new() -> Self {
         Self {
-            env_flags: 0,
+            env_flags: EnvFlags::new(0),
             fd: None,
             cmp_func: &default_compfunc,
             mmap: None,
@@ -267,7 +268,7 @@ impl Env<'_> {
      * Open a database file.
      * Create mode: create database if not exist.
      */
-    pub fn env_open(&mut self, path: &str, flags: u32, mode: u32) -> Result<(), Errors> {
+    pub fn env_open(&mut self, path: &str, env_flags: EnvFlags, mode: u32) -> Result<(), Errors> {
         if mode & consts::READ_ONLY != 0 && mode & consts::READ_WRITE != 0 {
             return Err(Errors::InvalidFlag(mode));
         }
@@ -289,7 +290,7 @@ impl Env<'_> {
         
         self.fd = Some(fd);
         
-        self.env_flags = flags;
+        self.env_flags = env_flags;
 
         let mut new_env = false;
         match self.env_read_header() {
@@ -353,7 +354,7 @@ impl Env<'_> {
         let page_ptr: *const u8 = buf.as_ptr();
 
         let head_page: &PageHead = unsafe {&*(page_ptr as *const PageHead)};
-        assert!(head_page.page_flags & consts::P_HEAD != 0);
+        assert!(head_page.page_flags.is_set(consts::P_HEAD));
 
         //let header: &DBHead = unsafe { // header of database
             //&*(page_ptr.offset(size_of::<Page>() as isize) as *const DBHead)
@@ -495,12 +496,12 @@ impl Env<'_> {
         let page1: &PageHead = unsafe {
             &*(page_ptr1 as *const PageHead)
         };
-        assert!(page1.page_flags & consts::P_META != 0);
+        assert!(page1.page_flags.is_set(consts::P_META));
         
         let page2: &PageHead = unsafe {
             &*(page_ptr2 as *const PageHead)
         };
-        assert!(page2.page_flags & consts::P_META != 0);
+        assert!(page2.page_flags.is_set(consts::P_META));
 
         let meta1: &DBMetaData = jump_head!(page_ptr1, PageHead, DBMetaData);
         let meta2: &DBMetaData = jump_head!(page_ptr2, PageHead, DBMetaData);
@@ -538,6 +539,8 @@ impl Env<'_> {
      * pages deallocated when the write transaction is committed.
      *
      * notice the difference between allocate_page and new_page.
+     *
+     * allocated page flags are clean, only pageno is set.
      */
     fn allocate_page(&self, num: usize, parent: *mut u8, index: usize, txn: &Txn) -> Result<*mut u8, Errors> {
         let layout = match Layout::from_size_align(num * self.env_head.as_ref().unwrap().page_size + size_of::<DirtyPageHead>(), 1) {
@@ -569,18 +572,35 @@ impl Env<'_> {
      * allocate new page, only when a page need to split.
      * page reallocation not included.
      * @param txn: as only provided only for the write transaction, a txn ref parameter 
-     * needed.
-     * @param flag: branch page or leaf page, used to update database stat information.
+     *  needed.
+     * @param flag: branch page or leaf page or overflow page, used to update database 
+     *  stat information.
      *
      * @return Ok: a ptr includes DirtyPageHead and pages allocated returned in the form
      * of *mut u8.
      */
-    pub fn new_page(&self, txn: &Txn, flag: u32, num: usize) -> Result<*mut u8, Errors> {
-        if txn.get_txn_flags() & consts::READ_ONLY_TXN != 0 {
+    pub fn new_page(&self, txn: &Txn, page_flags: PageFlags, num: usize) -> Result<*mut u8, Errors> {
+        if txn.get_txn_flags().is_set(consts::READ_ONLY_TXN) {
             return Err(Errors::ReadOnlyTxnNotAllowed);
         }
 
-        let ptr = self.allocate_page(num, ptr::null_mut(), 0, txn)?;
+        let ptr = self.allocate_page(num, ptr::null_mut(), std::usize::MAX, txn)?;
+        let page_head = jump_head_mut!(ptr, DirtyPageHead, PageHead);
+        page_head.page_flags = page_flags | consts::P_DIRTY;
+        page_head.page_bounds.lower_bound = size_of::<PageHead>();
+        page_head.page_bounds.upper_bound = self.env_head.as_ref().unwrap().page_size;
+        
+        //update env stat
+        let mut mg = self.env_meta.lock().unwrap();
+        let mut env_meta: &mut DBMetaData = mg.as_mut().unwrap();
+        if page_flags.is_set(consts::P_LEAF) {
+            env_meta.db_stat.leaf_pages += 1;
+        } else if page_flags.is_set(consts::P_BRANCH) {
+            env_meta.db_stat.branch_pages += 1;
+        } else if page_flags.is_set(consts::P_OVERFLOW) {
+            env_meta.db_stat.overflow_pages += 1;
+        }
+        
         Ok(ptr) //temporary
     }
 
@@ -628,7 +648,7 @@ impl Env<'_> {
                     return Err(e);
                 }
                 self.get_root_pageno()
-            } else if txn.unwrap().get_txn_flags() >= consts::TXN_BROKEN {
+            } else if txn.unwrap().get_txn_flags().is_broken() {
                 return Err(Errors::BrokenTxn(String::from(format!("{:?}", txn))));
             } else {
                 txn.unwrap().get_txn_root()
@@ -704,6 +724,31 @@ impl Env<'_> {
         assert!(PageHead::is_set(page_parent.page, consts::P_LEAF));
 
         debug!("found leaf page {} at index {}", PageHead::get_info(page_parent.page), page_parent.index);
+
+        Ok(())
+    }
+
+    /**
+     * split a page, but only when more than 1/4 of the page space is used.
+     * supports inserting a new node during splitting.
+     *
+     * splitting a page needs to insert a new node into the parent page, may cause to
+     * parent page splitted.
+     */
+    pub fn split(&self, page_parent: &mut PageParent, key: Option<&Val>, val: Option<&Val>, pageno: Option<&Val>, index: usize, flags: u32, txn: &Txn) -> Result<(), Errors> {
+        if page_parent.parent.is_null() {
+            let parent_ptr = self.new_page(txn, consts::P_BRANCH, 1)?;
+            
+            let mut mg = self.env_meta.lock().unwrap();
+            let mut env_meta: &mut DBMetaData = mg.as_mut().unwrap();
+            env_meta.db_stat.depth += 1;
+            debug!("B+ tree depth increases 1");
+            
+            page_parent.parent = unsafe {parent_ptr.offset(size_of::<DirtyPageHead>() as isize)};
+            PageHead::add_node(page_parent.parent, None, None, Some(PageHead::get_pageno(page_parent.page)), 0, NodeFlags::new(0), txn)?;
+        }
+
+
 
         Ok(())
     }
