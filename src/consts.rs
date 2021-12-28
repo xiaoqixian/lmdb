@@ -38,6 +38,7 @@ pub const MAX_READERS: usize = 126;
 
 ///key/value pair operation flags
 pub const K_OVERRITE: u32 = 0x1;
+pub const NODE_NONE: NodeFlags = NodeFlags {inner: 0};
 pub const V_BIGDATA: NodeFlags = NodeFlags {inner: 0x2}; //node flags
 pub const MINKEYS: usize = 4; //min number of keys on a page.
 

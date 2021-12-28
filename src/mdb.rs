@@ -26,7 +26,7 @@ use crate::consts;
 use crate::cursor::Cursor;
 use crate::txn::{Txn, ReadTxnInfo, Reader, unit, Val};
 use crate::{info, debug, error, jump_head, jump_head_mut, ptr_ref, ptr_mut_ref};
-use crate::page::{PageHead, PageParent, PageBounds, DirtyPageHead};
+use crate::page::{PageHead, PageParent, PageBounds, DirtyPageHead, Node};
 use crate::flags::{EnvFlags, PageFlags, NodeFlags};
 
 pub type Pageno = usize;
@@ -735,7 +735,10 @@ impl Env<'_> {
      * splitting a page needs to insert a new node into the parent page, may cause to
      * parent page splitted.
      */
-    pub fn split(&self, page_parent: &mut PageParent, key: Option<&Val>, val: Option<&Val>, pageno: Option<&Val>, index: usize, flags: u32, txn: &Txn) -> Result<(), Errors> {
+    pub fn split(&self, page_parent: &mut PageParent, key: Option<&Val>, val: Option<&Val>, pageno: Option<Pageno>, index: usize, node_flags: NodeFlags, txn: &Txn) -> Result<(), Errors> {
+        debug!("splitting page {}", PageHead::get_pageno(page_parent.page));
+
+        //create a parent page if it's a root page.
         if page_parent.parent.is_null() {
             let parent_ptr = self.new_page(txn, consts::P_BRANCH, 1)?;
             
@@ -745,8 +748,64 @@ impl Env<'_> {
             debug!("B+ tree depth increases 1");
             
             page_parent.parent = unsafe {parent_ptr.offset(size_of::<DirtyPageHead>() as isize)};
+            debug!("root split! new root = {}", PageHead::get_pageno(page_parent.parent));
             PageHead::add_node(page_parent.parent, None, None, Some(PageHead::get_pageno(page_parent.page)), 0, NodeFlags::new(0), txn)?;
         }
+
+        let page_size = self.env_head.as_ref().unwrap().page_size;
+
+        let sibling_page_ptr = self.new_page(txn, PageHead::get_flags(page_parent.page), 1)?;
+        let sib_dpage = ptr_mut_ref!(sibling_page_ptr, DirtyPageHead);
+        sib_dpage.parent = page_parent.parent;
+        sib_dpage.index = page_parent.index + 1;
+        
+        //alloc a temp page and copy all data on spiltting page to it.
+        let layout = match Layout::from_size_align(page_size, 1) {
+            Ok(v) => v,
+            Err(e) => {
+                return Err(Errors::LayoutError(e));
+            }
+        };
+        let copy = unsafe {
+            let copy = alloc(layout);
+            ptr::copy_nonoverlapping(page_parent.page, copy, page_size);
+            ptr::write_bytes::<u8>(page_parent.page.offset(size_of::<PageHead>() as isize), 0, page_size - size_of::<PageHead>());
+            copy
+        };
+        PageHead::set_lower_bound(page_parent.page, size_of::<PageHead>());
+        PageHead::set_upper_bound(page_parent.page, page_size);
+
+        let num_keys = PageHead::num_keys(copy);
+        let split_index = num_keys/2 + 1;
+
+        //create a seperator key and insert it into the parent page.
+        let mut sep_key = Val::new(0, ptr::null_mut());
+        if split_index == index {
+            sep_key = *key.unwrap();
+        } else {
+            let mid_node = PageHead::get_node(copy, split_index)?;
+            sep_key.size = mid_node.key_size;
+            sep_key.data = mid_node.key_data;
+        }
+
+        if PageHead::left_space(page_parent.parent) < size_of::<Indext>() + size_of::<Node>() + sep_key.size {
+            //no enough space in the parent node, split the parent page.
+            assert!(PageHead::is_set(page_parent.parent, consts::P_DIRTY));
+            let parent_dpage_head = PageHead::get_dpage_head(page_parent.parent);
+            let mut parent_page_parent = PageParent::new();
+            parent_page_parent.page = page_parent.parent;
+            parent_page_parent.parent = parent_dpage_head.parent;
+            parent_page_parent.index = parent_dpage_head.index;
+
+            self.split(&mut parent_page_parent, Some(&sep_key), None, Some(jump_head_mut!(sibling_page_ptr, DirtyPageHead, PageHead).pageno), split_index, consts::NODE_NONE, txn)?;
+        } else {
+            PageHead::add_node(page_parent.parent, Some(&sep_key), None, Some(jump_head_mut!(sibling_page_ptr, DirtyPageHead, PageHead).pageno), split_index, consts::NODE_NONE, txn)?;
+        }
+
+        let mut i: usize = 0;
+        let mut k: usize = 0;
+        let mut arr1 = Array::<Indext>::new(unsafe {page_parent.page.offset(size_of::<PageHead>() as isize)});
+        let mut arr2 = Array::<Indext>::new(unsafe {sibling_page_ptr.offset(size_of::<PageHead>() as isize)});
 
 
 

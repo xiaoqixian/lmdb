@@ -57,6 +57,7 @@ pub struct PageParent {
 /**
  * To present a dirty page or a group of dirty pages.
  */
+#[derive(Debug, Clone, Copy)]
 pub struct DirtyPageHead {
     pub parent: *mut u8,
     pub index: usize, //index that this page in it's parent page.
@@ -159,6 +160,18 @@ impl PageHead {
     pub fn num_keys(page_ptr: *mut u8) -> usize {
         let lower_bound = unsafe {*(page_ptr as *const PageHead)}.page_bounds.lower_bound;
         (lower_bound - size_of::<PageHead>()) >> 1 //because ptr index length is 2 bytes.
+    }
+
+    pub fn branch_size(page_ptr: *mut u8, index: usize) -> Result<usize, Errors> {
+        assert!(!page_ptr.is_null());
+        let node = Self::get_node(page_ptr, index)?;
+        Ok(size_of::<Indext>() + size_of::<Node>() + node.key_size)
+    }
+
+    pub fn get_dpage_head(page_ptr: *mut u8) -> DirtyPageHead {
+        unsafe {
+            *(page_ptr.offset(-(size_of::<DirtyPageHead>() as isize)) as *const DirtyPageHead)
+        }
     }
 
     /**
