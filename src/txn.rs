@@ -280,7 +280,7 @@ impl<'a> Txn<'a> {
                         debug!(s);
                         //need to split the page.
                         //page spliting also support inserting a new node.
-                        self.env.split(&mut page_parent, Some(&key), Some(&val), None, insert_index, 0, &self)?;
+                        self.env.split(page_parent.page, &key, Some(&val), None, insert_index, consts::NODE_NONE, &self)?;
                     },
                     Err(e) => {
                         return Err(e);

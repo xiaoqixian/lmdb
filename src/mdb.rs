@@ -25,7 +25,7 @@ use std::cell::{RefCell, Ref};
 use crate::consts;
 use crate::cursor::Cursor;
 use crate::txn::{Txn, ReadTxnInfo, Reader, unit, Val};
-use crate::{info, debug, error, jump_head, jump_head_mut, ptr_ref, ptr_mut_ref};
+use crate::{info, debug, error, jump_head, jump_head_mut, ptr_ref, ptr_mut_ref, back_head_mut};
 use crate::page::{PageHead, PageParent, PageBounds, DirtyPageHead, Node};
 use crate::flags::{EnvFlags, PageFlags, NodeFlags};
 
@@ -732,14 +732,22 @@ impl Env<'_> {
      * split a page, but only when more than 1/4 of the page space is used.
      * supports inserting a new node during splitting.
      *
-     * splitting a page needs to insert a new node into the parent page, may cause to
+     * splitting a page needs to insert a new node into the parent page, may cause it's
      * parent page splitted.
+     *
+     * splitting a page also needs a new key/val pair to be inserted into either this page
+     * or it's right sigling page. Inserted page pointer and the key's index returned.
      */
-    pub fn split(&self, page_parent: &mut PageParent, key: Option<&Val>, val: Option<&Val>, pageno: Option<Pageno>, index: usize, node_flags: NodeFlags, txn: &Txn) -> Result<(), Errors> {
-        debug!("splitting page {}", PageHead::get_pageno(page_parent.page));
+    pub fn split(&self, page: *mut u8, key: &Val, val: Option<&Val>, pageno: Option<Pageno>, index: usize, node_flags: NodeFlags, txn: &Txn) -> Result<(*mut u8, usize), Errors> {
+        assert_ne!(val.is_none(), pageno.is_none());
+        debug!("splitting page {}", PageHead::get_pageno(page));
+
+        let mut dpage = back_head_mut!(page, DirtyPageHead);
+        let mut ret_ptr = ptr::null_mut();
+        let mut ret_index = std::usize::MAX;
 
         //create a parent page if it's a root page.
-        if page_parent.parent.is_null() {
+        if dpage.parent.is_null() {
             let parent_ptr = self.new_page(txn, consts::P_BRANCH, 1)?;
             
             let mut mg = self.env_meta.lock().unwrap();
@@ -747,17 +755,17 @@ impl Env<'_> {
             env_meta.db_stat.depth += 1;
             debug!("B+ tree depth increases 1");
             
-            page_parent.parent = unsafe {parent_ptr.offset(size_of::<DirtyPageHead>() as isize)};
-            debug!("root split! new root = {}", PageHead::get_pageno(page_parent.parent));
-            PageHead::add_node(page_parent.parent, None, None, Some(PageHead::get_pageno(page_parent.page)), 0, NodeFlags::new(0), txn)?;
+            dpage.parent = unsafe {parent_ptr.offset(size_of::<DirtyPageHead>() as isize)};
+            debug!("root split! new root = {}", PageHead::get_pageno(dpage.parent));
+            PageHead::add_node(dpage.parent, None, None, Some(PageHead::get_pageno(page)), 0, NodeFlags::new(0), txn)?;
         }
 
         let page_size = self.env_head.as_ref().unwrap().page_size;
 
-        let sibling_page_ptr = self.new_page(txn, PageHead::get_flags(page_parent.page), 1)?;
-        let sib_dpage = ptr_mut_ref!(sibling_page_ptr, DirtyPageHead);
-        sib_dpage.parent = page_parent.parent;
-        sib_dpage.index = page_parent.index + 1;
+        let sib_dpage_ptr = self.new_page(txn, PageHead::get_flags(page), 1)?;
+        let mut sib_dpage = ptr_mut_ref!(sib_dpage_ptr, DirtyPageHead);
+        sib_dpage.parent = dpage.parent;
+        sib_dpage.index = dpage.index + 1;
         
         //alloc a temp page and copy all data on spiltting page to it.
         let layout = match Layout::from_size_align(page_size, 1) {
@@ -768,48 +776,82 @@ impl Env<'_> {
         };
         let copy = unsafe {
             let copy = alloc(layout);
-            ptr::copy_nonoverlapping(page_parent.page, copy, page_size);
-            ptr::write_bytes::<u8>(page_parent.page.offset(size_of::<PageHead>() as isize), 0, page_size - size_of::<PageHead>());
+            ptr::copy_nonoverlapping(page, copy, page_size);
+            ptr::write_bytes::<u8>(page.offset(size_of::<PageHead>() as isize), 0, page_size - size_of::<PageHead>());
             copy
         };
-        PageHead::set_lower_bound(page_parent.page, size_of::<PageHead>());
-        PageHead::set_upper_bound(page_parent.page, page_size);
+        PageHead::set_lower_bound(page, size_of::<PageHead>());
+        PageHead::set_upper_bound(page, page_size);
 
         let num_keys = PageHead::num_keys(copy);
         let split_index = num_keys/2 + 1;
 
         //create a seperator key and insert it into the parent page.
-        let mut sep_key = Val::new(0, ptr::null_mut());
-        if split_index == index {
-            sep_key = *key.unwrap();
+        let sep_key = if split_index == index {
+            *key
         } else {
             let mid_node = PageHead::get_node(copy, split_index)?;
-            sep_key.size = mid_node.key_size;
-            sep_key.data = mid_node.key_data;
-        }
+            Val {size: mid_node.key_size, data: mid_node.key_data}
+        };
 
-        if PageHead::left_space(page_parent.parent) < size_of::<Indext>() + size_of::<Node>() + sep_key.size {
+        if PageHead::left_space(dpage.parent) < size_of::<Indext>() + size_of::<Node>() + sep_key.size {
             //no enough space in the parent node, split the parent page.
-            assert!(PageHead::is_set(page_parent.parent, consts::P_DIRTY));
-            let parent_dpage_head = PageHead::get_dpage_head(page_parent.parent);
-            let mut parent_page_parent = PageParent::new();
-            parent_page_parent.page = page_parent.parent;
-            parent_page_parent.parent = parent_dpage_head.parent;
-            parent_page_parent.index = parent_dpage_head.index;
+            //assume parent page is dirty, as normally only when we need to put a pair,
+            //then we may need to split a page, so all it's ancestor pages are dirty.
+            assert!(PageHead::is_set(dpage.parent, consts::P_DIRTY));
 
-            self.split(&mut parent_page_parent, Some(&sep_key), None, Some(jump_head_mut!(sibling_page_ptr, DirtyPageHead, PageHead).pageno), split_index, consts::NODE_NONE, txn)?;
+            self.split(dpage.parent, &sep_key, None, Some(jump_head_mut!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno), split_index, consts::NODE_NONE, txn)?;
+
+            if dpage.parent != sib_dpage.parent && dpage.index >= PageHead::num_keys(dpage.parent) {
+                dpage.parent = sib_dpage.parent;
+                dpage.index = sib_dpage.index - 1;
+            }
+
         } else {
-            PageHead::add_node(page_parent.parent, Some(&sep_key), None, Some(jump_head_mut!(sibling_page_ptr, DirtyPageHead, PageHead).pageno), split_index, consts::NODE_NONE, txn)?;
+            PageHead::add_node(dpage.parent, Some(&sep_key), None, Some(jump_head_mut!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno), split_index, consts::NODE_NONE, txn)?;
         }
 
-        let mut i: usize = 0;
-        let mut k: usize = 0;
-        let mut arr1 = Array::<Indext>::new(unsafe {page_parent.page.offset(size_of::<PageHead>() as isize)});
-        let mut arr2 = Array::<Indext>::new(unsafe {sibling_page_ptr.offset(size_of::<PageHead>() as isize)});
+        let mut i: usize = 0;//index in copy
+        let mut k: usize = 0;//index in this page and sibling page.
+        let mut ins_new = false;//is the new key is inserted.
+        let is_leaf = PageHead::is_set(page, consts::P_LEAF);
 
+        while i < num_keys {
+            let ins_page_ptr = if i < split_index {
+                page
+            } else {
+                if i == split_index {
+                    k = if i == index && ins_new {1} else {0};
+                }
+                unsafe {sib_dpage_ptr.offset(size_of::<DirtyPageHead>() as isize)}
+            };
+    
+            //get node
+            if i == index && !ins_new {
+                PageHead::add_node(ins_page_ptr, Some(key), val, pageno, k, consts::NODE_NONE, txn)?;
+                ins_new = true;
+                ret_index = k;
+                ret_ptr = ins_page_ptr;
+            } else if i == num_keys {
+                break;
+            } else {
+                let node = PageHead::get_node(copy, i)?;
+                let temp_key = Val {data: node.key_data, size: node.key_size};
+                
+                if is_leaf {
+                    let temp_val = Val {data: node.val_data, size: unsafe {node.u.datasize}};
+                    PageHead::add_node(ins_page_ptr, Some(&temp_key), Some(&temp_val), None, k, node.node_flags, txn)?;
+                } else {
+                    PageHead::add_node(ins_page_ptr, Some(&temp_key), None, Some(unsafe {node.u.pageno}), k, node.node_flags, txn)?;
+                }
+                i += 1;
+            }
 
+            k += 1;
+        }
 
-        Ok(())
+        unsafe {dealloc(copy, layout);}
+        Ok((ret_ptr, ret_index))
     }
 }
 

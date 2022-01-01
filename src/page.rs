@@ -77,8 +77,9 @@ pub union PagenoDatasize {
 pub struct Node {
     pub u: PagenoDatasize,
     pub node_flags: NodeFlags,
-    pub key_size: usize,
-    pub key_data: *mut u8,
+    pub key_size: usize, //key_size could be zero, but only when it's a branch node and insert index is zero.
+    pub key_data: *mut u8, //could be null when it's a branch node and it's index is 0.
+    pub val_data: *mut u8 //could be null when it's a branch node
 }
 
 
@@ -251,6 +252,7 @@ impl PageHead {
         Ok(Some((mid as usize, cmp_res == 0)))
     }
 
+
     /**
      * append a node to a page.
      * If no room in this page, we need to split the page, but it's the job of this function.
@@ -325,7 +327,7 @@ impl PageHead {
                 }
             }
         };
-
+        node.val_data = ptr::null_mut();
         
         if PageHead::is_set(page_ptr, consts::P_LEAF) {
             if flags.is_set(consts::V_BIGDATA) {
@@ -346,7 +348,8 @@ impl PageHead {
                 node.u.datasize = val.unwrap().size;
                 //copy val data
                 unsafe {
-                    ptr::copy_nonoverlapping(val.unwrap().data, page_ptr.offset((ofs + size_of::<Node>() + key.unwrap().size) as isize), val.unwrap().size);
+                    node.val_data = page_ptr.offset((ofs + size_of::<Node>() + key.unwrap().size) as isize);
+                    ptr::copy_nonoverlapping(val.unwrap().data, node.val_data, val.unwrap().size);
                 }
             }
 
@@ -425,4 +428,16 @@ impl PageParent {
     }
 }
 
+impl DirtyPageHead {
+    #[inline]
+    pub fn get_parent(dpage_ptr: *mut Self) -> *mut u8 {
+        assert!(!dpage_ptr.is_null());
+        unsafe {(*dpage_ptr).parent}
+    }
 
+    #[inline]
+    pub fn get_index(dpage_ptr: *mut Self) -> *mut u8 {
+        assert!(!dpage_ptr.is_null());
+        unsafe {(*dpage_ptr).parent}
+    }
+}
