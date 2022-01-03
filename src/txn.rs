@@ -20,7 +20,7 @@ use crate::consts;
 use crate::errors::Errors;
 use crate::mdb::{Env, Pageno};
 use crate::page::{PageHead, DirtyPageHead};
-use crate::{debug, jump_head_ptr};
+use crate::{debug, jump_head_ptr, jump_head, error, info};
 use crate::flags::{TxnFlags, NodeFlags, OperationFlags};
 
 #[derive(Copy, Clone)]
@@ -78,14 +78,13 @@ impl Val {
     /**
      * 
      */
-    pub fn get_readable_data(&self) -> [char; 10] {
-        let mut res = [32 as char; 10];
-        let len = if self.size < 10 {self.size} else {10};
-        let data_ref = unsafe {std::slice::from_raw_parts(self.data as *const _, len)};
-        for i in 0..len {
-            res[i] = data_ref[i] as char;
+    pub fn get_readable_data(&self) -> String {
+        let mut res = vec![0 as u8; self.size];
+        let data_ref = unsafe {std::slice::from_raw_parts(self.data as *const _, self.size)};
+        for i in 0..self.size {
+            res[i] = data_ref[i];
         }
-        res
+        String::from_utf8(res).unwrap()
     }
 }
 
@@ -137,7 +136,7 @@ impl ReadTxnInfo {
 }
 
 impl<'a> Txn<'a> {
-    pub fn new(env: &'a Arc<Env<'a>>, read_only: bool) -> Result<Arc<Self>, Errors> {
+    pub fn new(env: &'a Arc<Env<'a>>, read_only: bool) -> Result<Self, Errors> {
         //let env_mut_ref: &mut Env = unsafe {
             //&mut *(Arc::into_raw(env.clone()) as *mut Env)
         //};
@@ -161,7 +160,7 @@ impl<'a> Txn<'a> {
             //always read metadata before begin a new transaction
             //read metadata also won't affect read transactions because of toggle meta pages. 
 
-            let txn: Arc<Self> = Arc::new(Self {
+            let txn = Self {
                 txn_id: env.get_txn_id(),
                 txn_root: RefCell::new(env.get_root_pageno()),
                 txn_next_pgno: RefCell::new(env.get_last_page()+1),
@@ -172,9 +171,12 @@ impl<'a> Txn<'a> {
                     dirty_queue: mem::ManuallyDrop::new(VecDeque::new())
                 }),
                 txn_flags: TxnFlags::new(0)
-            });
+            };
 
-            env.set_w_txn(Some(Arc::downgrade(&txn)));
+            env.set_w_txn_first_page(txn.txn_first_pgno);
+
+            //TODO: Not sure if I need to put a txn ref in env.
+            //env.set_w_txn(Some(Arc::downgrade(&txn)));
 
             debug!("begin a write transaction {} on root {}", txn.txn_id, *txn.txn_root.borrow());
             Ok(txn)
@@ -187,7 +189,7 @@ impl<'a> Txn<'a> {
             env.env_read_meta()?;
             debug!("read meta data: {:?}", env.get_meta());
 
-            let txn = Arc::new(Self {
+            let txn = Self {
                 txn_id: env.get_txn_id(),
                 txn_root: RefCell::new(env.get_root_pageno()),
                 txn_next_pgno: RefCell::new(env.get_last_page()+1),
@@ -198,7 +200,7 @@ impl<'a> Txn<'a> {
                     reader,
                 }),
                 txn_flags: consts::READ_ONLY_TXN,
-            });
+            };
 
             debug!("begin a read only transaction {} on root {}", txn.txn_id, *txn.txn_root.borrow());
             Ok(txn)
@@ -211,6 +213,18 @@ impl<'a> Txn<'a> {
     pub fn add_dirty_page(&self, dpage_ptr: *mut u8) -> Result<(), Errors> {
         unsafe {self.u.borrow_mut().dirty_queue.push_back(NonNull::new(dpage_ptr).unwrap())};
         Ok(())
+    }
+
+    pub fn find_dirty_page(&self, pageno: Pageno) -> Result<*mut u8, Errors> {
+        unsafe {
+            for ptr in self.u.borrow().dirty_queue.iter() {
+                let ph = jump_head!((*ptr).as_ptr(), DirtyPageHead, PageHead);
+                if ph.pageno == pageno {
+                    return Ok((*ptr).as_ptr().offset(size_of::<DirtyPageHead>() as isize));
+                }
+            }
+        }
+        Err(Errors::PageNotFound(pageno))
     }
 
     pub fn get_txn_flags(&self) -> TxnFlags {
@@ -266,6 +280,7 @@ impl<'a> Txn<'a> {
                     Some((index, exact)) => {
                         if exact {
                             if !flags.is_set(consts::K_OVERRITE) {
+                                error!("KeyExist: {:?}", &key);
                                 return Err(Errors::KeyExist(format!("{:?}", &key)));
                             }
                             PageHead::del_node(page_parent.page, index)?;
@@ -274,10 +289,10 @@ impl<'a> Txn<'a> {
                     }
                 };
 
-                match PageHead::add_node(page_parent.page, Some(&key), Some(&val), None, insert_index, NodeFlags::new(0), &self) {
+                match PageHead::add_node(page_parent.page, Some(&key), Some(&val), None, insert_index, consts::NODE_NONE, &self) {
                     Ok(_) => {},
                     Err(Errors::NoSpace(s)) => {
-                        debug!(s);
+                        debug!("add node no space");
                         //need to split the page.
                         //page spliting also support inserting a new node.
                         self.env.split(page_parent.page, &key, Some(&val), None, insert_index, consts::NODE_NONE, &self)?;
@@ -292,6 +307,8 @@ impl<'a> Txn<'a> {
                 let root_ptr = self.env.new_page(&self, consts::P_LEAF, 1)?;
                 PageHead::add_node(jump_head_ptr!(root_ptr, DirtyPageHead), Some(&key), Some(&val), None, 0, consts::NODE_NONE, &self)?;
                 self.env.add_depth();
+                self.txn_root.replace(jump_head!(root_ptr, DirtyPageHead, PageHead).pageno);
+                debug!("new txn_root: {}", *self.txn_root.borrow());
             },
             Err(e) => {
                 return Err(e)

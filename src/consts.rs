@@ -45,5 +45,7 @@ pub const V_BIGDATA: NodeFlags = NodeFlags {inner: 0x10}; //node flags
 pub const MINKEYS: usize = 4; //min number of keys on a page.
 
 ///key/value pair operation flags
+pub const OP_NONE: OperationFlags = OperationFlags {inner: 0};
 pub const K_OVERRITE: OperationFlags = OperationFlags {inner: 0x1};
 
+pub const ENV_NONE: EnvFlags = EnvFlags {inner: 0};

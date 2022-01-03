@@ -46,6 +46,7 @@ pub enum Errors {
     KeyExist(String),
     NoSpace(String),
     InvalidParameters(String),
+    PageNotFound(crate::mdb::Pageno),
 
     Seldom(String), //hard to classify
 

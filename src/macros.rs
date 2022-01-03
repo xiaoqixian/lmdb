@@ -26,7 +26,7 @@ macro_rules! info {
         //println!("{}[INFO {}:{}] {}", termion::color::Fg(termion::color::Blue), file!(), line!(), $string);
         colour::blue_ln!("[INFO {}:{}] {}", file!(), line!(), $string);
     };
-    ($string: expr, $($formats: expr)*) => {
+    ($string: expr, $($formats: tt)*) => {
         let s = format!($string, $($formats)*);
         colour::blue_ln!("[INFO {}:{}] {}", file!(), line!(), s);
     }
@@ -62,11 +62,11 @@ macro_rules! debug {
 #[macro_export]
 macro_rules! error {
     ($string: expr) => {
-        colour::red!("[ERROR {}:{}:{}] {}", file!(), crate::function!(), line!(), $string);
+        colour::red_ln!("[ERROR {}:{}:{}] {}", file!(), crate::function!(), line!(), $string);
     };
     ($string: expr, $($formats: tt)*) => {
         let s = format!($string, $($formats)*);
-        colour::red!("[ERROR {}:{}:{}] {}", file!(), crate::function!(), line!(), s);
+        colour::red_ln!("[ERROR {}:{}:{}] {}", file!(), crate::function!(), line!(), s);
     }
 }
 

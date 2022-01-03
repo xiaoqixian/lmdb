@@ -16,7 +16,7 @@ use crate::mdb::{Pageno, Array, Indext, CmpFunc};
 use crate::txn::{Txn, Val};
 use crate::consts;
 use crate::errors::Errors;
-use crate::{debug, error, jump_head, jump_head_mut};
+use crate::{debug, error, jump_head, jump_head_mut, info};
 use crate::flags::{PageFlags, NodeFlags};
 
 /**
@@ -82,6 +82,18 @@ pub struct Node {
     pub val_data: *mut u8 //could be null when it's a branch node
 }
 
+impl fmt::Debug for Node {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = std::str::from_utf8(unsafe {std::slice::from_raw_parts(self.key_data, self.key_size)}).unwrap();
+        f.debug_struct("Node")
+            .field("node_flags", &self.node_flags)
+            .field("key", if self.key_size == 0 {
+                &"None"
+            } else {
+                &s
+            }).finish()
+    }
+}
 
 impl PageHead {
     pub fn new(pageno: Pageno) -> Self {
@@ -184,7 +196,7 @@ impl PageHead {
         }
 
         //let node_offset = unsafe {*(parent.offset((size_of::<PageHead>() + index*size_of::<Indext>()) as isize) as *const Indext) as isize};
-        let node_offset = Array::<Indext>::new(parent)[index] as isize;
+        let node_offset = Array::<Indext>::new_jump_head(parent)[index] as isize;
         debug!("child node offset {}", node_offset);
         let node = unsafe {&mut *(parent.offset(node_offset) as *mut Node)};
         node.u.pageno = pageno;
@@ -216,14 +228,14 @@ impl PageHead {
      * If the key is greater than all child nodes in this page, then return Ok(None).
      */
     pub fn search_node(page_ptr: *mut u8, key: &Val, cmp_func: &CmpFunc) -> Result<Option<(usize, bool)>, Errors> {
+        info!("search_node for {}", key.get_readable_data());
         let mut low: i32 = if PageHead::is_set(page_ptr, consts::P_LEAF) {0} else {1};
-        let mut high: i32 = (PageHead::num_keys(page_ptr) - 1) as i32;
+        let mut high: i32 = PageHead::num_keys(page_ptr) as i32 - 1;
         let mut mid: i32 = -1;
-        let mut cmp_res: i32 = 0;
-        let node_offsets = Array::<Indext>::new(page_ptr);
+        let mut cmp_res: i32 = -2;
+        let node_offsets = Array::<Indext>::new_jump_head(page_ptr);
 
-        let mut index: usize = PageHead::num_keys(page_ptr) - 1;
-        let mut exact: bool = false;
+        debug!("low = {}, high = {}", low, high);
 
         while low <= high {
             mid = (low+high) >> 1;
@@ -247,6 +259,11 @@ impl PageHead {
             if mid >= PageHead::num_keys(page_ptr) as i32 {
                 return Ok(None);
             }
+        }
+
+        if PageHead::is_set(page_ptr, consts::P_BRANCH) {
+            let mid_node = unsafe {&*(page_ptr.offset(node_offsets[mid as usize] as isize) as *const Node)};
+            info!("key {} go with node {:?}", key.get_readable_data(), mid_node);
         }
 
         Ok(Some((mid as usize, cmp_res == 0)))
@@ -313,6 +330,7 @@ impl PageHead {
 
         let ofs = Self::get_upper_bound(page_ptr) - node_size;
         node_offsets[index] = ofs as Indext;
+        debug!("set ofs {} for index {} in {}", node_offsets[index], index, Self::get_pageno(page_ptr));
 
         let node = unsafe {&mut *(page_ptr.offset(ofs as isize) as *mut Node)};
         node.key_size = key_size;
@@ -354,8 +372,12 @@ impl PageHead {
             }
 
         } else {
+            //for branch nodes.
             node.u.pageno = pageno.unwrap();
         }
+
+        Self::set_lower_bound(page_ptr, Self::get_lower_bound(page_ptr) + size_of::<Indext>());
+        Self::set_upper_bound(page_ptr, Self::get_upper_bound(page_ptr) - node_size);
 
         Ok(())
     }

@@ -33,27 +33,42 @@ pub type Pageno = usize;
 pub type Indext = u16; //index of nodes in a node.
 pub type CmpFunc = dyn Fn(&Val, &Val) -> i32;
 
-pub struct Array<T> where T: Sized + Copy {
+pub struct Array<T> where T: Sized + Copy + fmt::Display {
     inner: *mut T
 }
 
-impl<T> Array<T> where T: Sized + Copy {
+impl<T> Array<T> where T: Sized + Copy + fmt::Display {
     pub fn new(ptr: *mut u8) -> Self {
         assert!(!ptr.is_null());
         Self {
             inner: ptr as *mut T
         }
     }
+
+    pub fn new_jump_head(ptr: *mut u8) -> Self {
+        assert!(!ptr.is_null());
+        Self {
+            inner: unsafe {ptr.offset(size_of::<PageHead>() as isize)} as *mut T
+        }
+    }
+
+    pub fn show(&self, len: usize) {
+        print!("[{}", self[0]);
+        for i in 1..len {
+            print!(", {}", self[i]);
+        }
+        println!("]");
+    }
 }
 
-impl<T> std::ops::Index<usize> for Array<T> where T: Sized + Copy {
+impl<T> std::ops::Index<usize> for Array<T> where T: Sized + Copy + fmt::Display {
     type Output = T;
     fn index(&self, index: usize) -> &Self::Output {
         unsafe {&*self.inner.offset(index as isize)}
     }
 }
 
-impl<T> std::ops::IndexMut<usize> for Array<T> where T: Sized + Copy {
+impl<T> std::ops::IndexMut<usize> for Array<T> where T: Sized + Copy + fmt::Display {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         unsafe {&mut *self.inner.offset(index as isize)}
     }
@@ -112,7 +127,7 @@ pub struct DBStat {
     entries: usize
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct DBMetaData {
     db_stat: DBStat,
     root: Pageno,
@@ -187,6 +202,17 @@ impl fmt::Debug for Env<'_> {
     }
 }
 
+impl fmt::Debug for DBMetaData {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DBMetaData")
+            .field("db_stat", &self.db_stat)
+            .field("root", if self.root == consts::P_INVALID {&"P_INVALID"} else {&self.root})
+            .field("last_page", &self.last_page)
+            .field("last_txn_id", &self.last_txn_id)
+            .finish()
+    }
+}
+
 impl Env<'_> {
     /**
      * create a new environment
@@ -249,6 +275,11 @@ impl Env<'_> {
 
     pub fn lock_w_mutex<'a>(&'a self) -> MutexGuard<'a, i32> {
         self.write_mutex.lock().unwrap()
+    }
+
+    #[inline]
+    pub fn set_w_txn_first_page(&self, pageno: Pageno) {
+        *(self.w_txn_first_page.as_ref().unwrap().write().unwrap()) = pageno;
     }
 
     pub fn add_reader(&self, pid: u32, tid: thread::ThreadId) -> Result<Reader, Errors> {
@@ -500,8 +531,8 @@ impl Env<'_> {
     }
 
     pub fn env_read_meta(&self) -> Result<(), Errors> {
-        let page_ptr1 = self.get_page(1)?;
-        let page_ptr2 = self.get_page(2)?;
+        let page_ptr1 = self.get_page(1, None)?;
+        let page_ptr2 = self.get_page(2, None)?;
         debug!("page_ptr1: {:?}", page_ptr1);
         debug!("page_ptr2: {:?}", page_ptr2);
         
@@ -533,11 +564,14 @@ impl Env<'_> {
         Ok(())
     }
 
-    pub fn get_page(&self, pageno: Pageno) -> Result<*mut u8, Errors> {
-        let w_txn_first_page = *self.w_txn_first_page.as_ref().unwrap().read().unwrap();
+    pub fn get_page(&self, pageno: Pageno, txn: Option<&Txn>) -> Result<*mut u8, Errors> {
+        let w_txn_first_page: Pageno = *self.w_txn_first_page.as_ref().unwrap().read().unwrap();
         if w_txn_first_page != consts::P_INVALID && pageno >= w_txn_first_page {
-            Ok(ptr::null_mut())
+            debug!("get dirty page {}", pageno);
+            assert!(txn.is_some());
+            txn.unwrap().find_dirty_page(pageno)
         } else {
+            debug!("get clean page {}", pageno);
             //let map_ptr: *mut u8 = self.mmap.as_mut().unwrap().as_mut().as_mut_ptr();
             let map_ptr: *mut u8 = self.mmap.as_ref().unwrap().as_ptr() as *mut u8;
             let page_size = self.env_head.as_ref().unwrap().page_size;
@@ -654,31 +688,33 @@ impl Env<'_> {
      * we should touch a new page to replace it. 
      */
     pub fn search_page(&self, key: &Val, txn: Option<&Txn>, cursor: Option<&Cursor>, modify: bool) -> Result<PageParent, Errors> {
-        let root: Pageno = {
-            if txn.is_none() {
-                if let Err(e) = self.env_read_meta() {
-                    return Err(e);
-                }
+        let root = match txn {
+            None => {
+                self.env_read_meta()?;
                 self.get_root_pageno()
-            } else if txn.unwrap().get_txn_flags().is_broken() {
-                return Err(Errors::BrokenTxn(String::from(format!("{:?}", txn))));
-            } else {
-                txn.unwrap().get_txn_root()
+            },
+            Some(v) => {
+                if v.get_txn_flags().is_broken() {
+                    return Err(Errors::BrokenTxn(String::from(format!("{:?}", txn))));
+                }
+                v.get_txn_root()
             }
         };
 
+        debug!("get root pageno {}", root);
         let mut page_parent = PageParent::new();
 
         if root == consts::P_INVALID {
             return Err(Errors::EmptyTree);
         }
 
-        page_parent.page = self.get_page(root)?;
+        page_parent.page = self.get_page(root, txn)?;
         debug!("root page with flags {:#X}", PageHead::get_flags(page_parent.page));
         
         // if this is the first time the current write transaction modifies.
         // touch a new root page 
         if modify && !PageHead::is_set(page_parent.page, consts::P_DIRTY) {
+            info!("root {} is not dirty", PageHead::get_pageno(page_parent.page));
             self.touch(&mut page_parent, txn.unwrap())?;
             txn.unwrap().update_root(PageHead::get_pageno(page_parent.page))?;
         }
@@ -723,7 +759,7 @@ impl Env<'_> {
 
             page_parent.parent = page_ptr;
             let node = PageHead::get_node(page_ptr, i)?;
-            page_parent.page = self.get_page(unsafe {node.u.pageno})?;
+            page_parent.page = self.get_page(unsafe {node.u.pageno}, txn)?;
             page_parent.index = i;
 
             if modify {
@@ -733,6 +769,7 @@ impl Env<'_> {
             page_ptr = page_parent.page;
         }
 
+        debug!("reach leaf page {}", PageHead::get_pageno(page_parent.page));
         assert!(PageHead::is_set(page_parent.page, consts::P_LEAF));
 
         debug!("found leaf page {} at index {}", PageHead::get_info(page_parent.page), page_parent.index);
@@ -762,14 +799,17 @@ impl Env<'_> {
         if dpage.parent.is_null() {
             let parent_ptr = self.new_page(txn, consts::P_BRANCH, 1)?;
             
-            let mut mg = self.env_meta.lock().unwrap();
-            let mut env_meta: &mut DBMetaData = mg.as_mut().unwrap();
-            env_meta.db_stat.depth += 1;
+            self.add_depth();
             debug!("B+ tree depth increases 1");
             
+            //add parent for dpage
             dpage.parent = unsafe {parent_ptr.offset(size_of::<DirtyPageHead>() as isize)};
+            dpage.index = 0;
             debug!("root split! new root = {}", PageHead::get_pageno(dpage.parent));
             PageHead::add_node(dpage.parent, None, None, Some(PageHead::get_pageno(page)), 0, NodeFlags::new(0), txn)?;
+
+            //update txn root
+            txn.update_root(PageHead::get_pageno(dpage.parent));
         }
 
         let page_size = self.env_head.as_ref().unwrap().page_size;
@@ -812,7 +852,7 @@ impl Env<'_> {
             //then we may need to split a page, so all it's ancestor pages are dirty.
             assert!(PageHead::is_set(dpage.parent, consts::P_DIRTY));
 
-            self.split(dpage.parent, &sep_key, None, Some(jump_head_mut!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno), split_index, consts::NODE_NONE, txn)?;
+            self.split(dpage.parent, &sep_key, None, Some(jump_head_mut!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno), sib_dpage.index, consts::NODE_NONE, txn)?;
 
             if dpage.parent != sib_dpage.parent && dpage.index >= PageHead::num_keys(dpage.parent) {
                 dpage.parent = sib_dpage.parent;
@@ -820,7 +860,8 @@ impl Env<'_> {
             }
 
         } else {
-            PageHead::add_node(dpage.parent, Some(&sep_key), None, Some(jump_head_mut!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno), split_index, consts::NODE_NONE, txn)?;
+            PageHead::add_node(dpage.parent, Some(&sep_key), None, Some(jump_head!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno), sib_dpage.index, consts::NODE_NONE, txn)?;
+            debug!("add right sibling node {} at split_index {}", jump_head!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno, split_index);
         }
 
         let mut i: usize = 0;//index in copy
