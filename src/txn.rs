@@ -9,8 +9,8 @@
 
 use std::collections::VecDeque;
 use std::sync::{Mutex, MutexGuard, Arc, Weak};
-use std::mem;
-use std::ptr::{NonNull};
+use std::mem::{self, size_of};
+use std::ptr::NonNull;
 use std::fmt;
 use std::thread;
 use std::process;
@@ -19,9 +19,9 @@ use std::cell::RefCell;
 use crate::consts;
 use crate::errors::Errors;
 use crate::mdb::{Env, Pageno};
-use crate::page::{PageHead};
-use crate::{debug};
-use crate::flags::{TxnFlags, NodeFlags};
+use crate::page::{PageHead, DirtyPageHead};
+use crate::{debug, jump_head_ptr};
+use crate::flags::{TxnFlags, NodeFlags, OperationFlags};
 
 #[derive(Copy, Clone)]
 pub struct Val {
@@ -241,7 +241,7 @@ impl<'a> Txn<'a> {
      *      K_OVERRITE: allow key overrite if key exists, if key exists and this flag not
      *                  setted, return Err(KeyExist)
      */
-    pub fn txn_put(&mut self, key: Val, val: Val, flags: u32) -> Result<(), Errors> {
+    pub fn txn_put(&mut self, key: Val, val: Val, flags: OperationFlags) -> Result<(), Errors> {
         if self.txn_flags.is_set(consts::READ_ONLY_TXN) {
             return Err(Errors::TryToPutInReadOnlyTxn);
         }
@@ -258,14 +258,14 @@ impl<'a> Txn<'a> {
         }
 
         match self.env.search_page(&key, Some(&self), None, true) {
-            Ok(mut page_parent) => {
+            Ok(page_parent) => {
                 let insert_index = match PageHead::search_node(page_parent.page, &key, self.env.cmp_func)? {
                     None => {
                         PageHead::num_keys(page_parent.page) - 1
                     },
                     Some((index, exact)) => {
                         if exact {
-                            if flags & consts::K_OVERRITE == 0 {
+                            if !flags.is_set(consts::K_OVERRITE) {
                                 return Err(Errors::KeyExist(format!("{:?}", &key)));
                             }
                             PageHead::del_node(page_parent.page, index)?;
@@ -290,12 +290,15 @@ impl<'a> Txn<'a> {
             Err(Errors::EmptyTree) => {
                 debug!("allocating a new root page");
                 let root_ptr = self.env.new_page(&self, consts::P_LEAF, 1)?;
-
+                PageHead::add_node(jump_head_ptr!(root_ptr, DirtyPageHead), Some(&key), Some(&val), None, 0, consts::NODE_NONE, &self)?;
+                self.env.add_depth();
             },
             Err(e) => {
                 return Err(e)
             }
         }
+
+        self.env.add_entry();
 
         Ok(())
     }

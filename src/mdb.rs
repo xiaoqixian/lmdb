@@ -207,16 +207,28 @@ impl Env<'_> {
         }
     }
 
+    #[inline]
     pub fn get_root_pageno(&self) -> Pageno {
         self.env_meta.lock().unwrap().unwrap().root
     }
 
+    #[inline]
     pub fn get_last_page(&self) -> Pageno {
         self.env_meta.lock().unwrap().unwrap().last_page
     }
 
     pub fn get_meta(&self) -> Option<DBMetaData> {
         *self.env_meta.lock().unwrap()
+    }
+
+    #[inline]
+    pub fn add_entry(&self) {
+        self.env_meta.lock().unwrap().as_mut().unwrap().db_stat.entries += 1;
+    }
+
+    #[inline]
+    pub fn add_depth(&self) {
+        self.env_meta.lock().unwrap().as_mut().unwrap().db_stat.depth += 1;
     }
 
     pub fn get_page_size(&self) -> usize {

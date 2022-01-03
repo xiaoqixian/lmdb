@@ -321,3 +321,64 @@ impl std::ops::BitXorAssign for FileFlags {
         self.inner ^= rhs.inner;
     }
 }
+
+/**
+ * Flags for operations
+ */
+#[derive(Debug, Clone, Copy)]
+pub struct OperationFlags {
+    pub inner: u32
+}
+
+impl OperationFlags {
+    pub fn new(val: u32) -> Self {
+        Self {inner: val}
+    }
+
+    pub fn is_set(&self, flag: Self) -> bool {
+        self.inner & flag.inner != 0
+    }
+
+    pub fn get_inner(&self) -> u32 {
+        self.inner
+    }
+}
+
+impl std::ops::BitOr for OperationFlags {
+    type Output = OperationFlags;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Self {inner: self.inner | rhs.inner}
+    }
+}
+
+impl std::ops::BitOrAssign for OperationFlags {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.inner |= rhs.inner;
+    }
+}
+
+impl std::ops::BitAnd for OperationFlags {
+    type Output = OperationFlags;
+    fn bitand(self, rhs: Self) -> Self::Output {
+        Self {inner: self.inner & rhs.inner}
+    }
+}
+
+impl std::ops::BitAndAssign for OperationFlags {
+    fn bitand_assign(&mut self, rhs: Self) {
+        self.inner &= rhs.inner;
+    }
+}
+
+impl std::ops::BitXor for OperationFlags {
+    type Output = OperationFlags;
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        Self {inner: self.inner ^ rhs.inner}
+    }
+}
+
+impl std::ops::BitXorAssign for OperationFlags {
+    fn bitxor_assign(&mut self, rhs: Self) {
+        self.inner ^= rhs.inner;
+    }
+}

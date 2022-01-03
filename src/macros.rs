@@ -107,6 +107,15 @@ macro_rules! back_head_mut {
     };
 }
 
+#[macro_export]
+macro_rules! jump_head_ptr {
+    ($ptr: expr, $head: ty) => {
+        unsafe {
+            $ptr.offset(size_of::<$head>() as isize)
+        }
+    };
+}
+
 macro_rules! offset_of {
     ($ty:ty, $field:ident) => {
         unsafe {&(*(0 as *const $ty)).$field as *const _ as isize}
