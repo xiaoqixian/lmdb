@@ -146,12 +146,13 @@ pub struct DBMetaData {
 //#[derive(Debug)]
 pub struct Env<'a> {
     env_flags: EnvFlags,
-    fd: Option<File>,
+    pub fd: Option<File>,
     pub cmp_func: &'a CmpFunc,
-    mmap: Option<MmapMut>,
+    pub mmap: Option<MmapMut>,
     w_txn: RefCell<Option<Weak<Txn<'a>>>>, //current write transaction
     env_head: Option<DBHead>,
     env_meta: Mutex<Option<DBMetaData>>,
+    toggle_page: RefCell<Pageno>,
     read_txn_info: Mutex<ReadTxnInfo>,
     write_mutex: Mutex<i32>,
     txn_id: Mutex<u32>, //increase when begin a new write transaction.
@@ -226,6 +227,7 @@ impl Env<'_> {
             w_txn: RefCell::new(None),
             env_head: Some(DBHead::new()),
             env_meta: Mutex::new(None),//later to read in with env_open().
+            toggle_page: RefCell::new(consts::P_INVALID),
             read_txn_info: Mutex::new(ReadTxnInfo::new()),
             write_mutex: Mutex::new(0),
             txn_id: Mutex::new(0),
@@ -243,6 +245,7 @@ impl Env<'_> {
         self.env_meta.lock().unwrap().unwrap().last_page
     }
 
+    #[inline]
     pub fn get_meta(&self) -> Option<DBMetaData> {
         *self.env_meta.lock().unwrap()
     }
@@ -257,6 +260,7 @@ impl Env<'_> {
         self.env_meta.lock().unwrap().as_mut().unwrap().db_stat.depth += 1;
     }
 
+    #[inline]
     pub fn get_page_size(&self) -> usize {
         self.env_head.as_ref().unwrap().page_size
     }
@@ -265,16 +269,24 @@ impl Env<'_> {
         //Some(self.txn_info.as_ref().unwrap().borrow())
     //}
 
+    #[inline]
     pub fn add_txn_id(&self) {
         (*self.txn_id.lock().unwrap()) += 1;
     }
 
+    #[inline]
     pub fn get_txn_id(&self) -> u32 {
         *self.txn_id.lock().unwrap()
     }
 
+    #[inline]
     pub fn lock_w_mutex<'a>(&'a self) -> MutexGuard<'a, i32> {
         self.write_mutex.lock().unwrap()
+    }
+
+    #[inline]
+    pub fn try_lock_w_mutex<'a>(&'a self) -> std::sync::TryLockResult<MutexGuard<'a, i32>> {
+        self.write_mutex.try_lock()
     }
 
     #[inline]
@@ -294,6 +306,7 @@ impl Env<'_> {
                     readers[i].tid = tid;
                     break;
                 }
+                i += 1;
             }
 
             if i == consts::MAX_READERS {
@@ -305,6 +318,29 @@ impl Env<'_> {
 
         mg.num_readers += 1;
         Ok(reader)
+    }
+
+    pub fn del_reader(&self, reader: Reader) -> Result<(), Errors> {
+        let mut mg = self.read_txn_info.lock().unwrap();
+        let exist = {
+            let readers = &mut mg.readers;
+            let mut i = 0;
+            let mut exist = false;
+
+            while i < consts::MAX_READERS {
+                if readers[i].tid == reader.tid && readers[i].pid == reader.pid {
+                    exist = true;
+                    break;
+                }
+                i += 1;
+            }
+            exist
+        };
+
+        if exist {
+            mg.num_readers -= 1;
+        }
+        Ok(())
     }
 
     /**
@@ -533,8 +569,6 @@ impl Env<'_> {
     pub fn env_read_meta(&self) -> Result<(), Errors> {
         let page_ptr1 = self.get_page(1, None)?;
         let page_ptr2 = self.get_page(2, None)?;
-        debug!("page_ptr1: {:?}", page_ptr1);
-        debug!("page_ptr2: {:?}", page_ptr2);
         
         let page1: &PageHead = unsafe {
             &*(page_ptr1 as *const PageHead)
@@ -549,18 +583,46 @@ impl Env<'_> {
         let meta1: &DBMetaData = jump_head!(page_ptr1, PageHead, DBMetaData);
         let meta2: &DBMetaData = jump_head!(page_ptr2, PageHead, DBMetaData);
 
-        debug!("meta1: {:?}", meta1);
-        debug!("meta2: {:?}", meta2);
+        info!("meta1: {:?}", meta1);
+        info!("meta2: {:?}", meta2);
 
         *self.env_meta.lock().unwrap() = Some(
             if meta2.last_txn_id > meta1.last_txn_id {
                 debug!("Using meta page 2");
+                *self.toggle_page.borrow_mut() = 1;
                 *meta2
             } else {
                 debug!("Using meta page 1");
+                *self.toggle_page.borrow_mut() = 2;
                 *meta1
             }
         );
+        Ok(())
+    }
+
+    pub fn env_write_meta(&self, txn: &Txn) -> Result<(), Errors> {
+        let toggle_page = *self.toggle_page.borrow();
+        assert!(toggle_page <= 2);
+        
+        let mut meta = self.get_meta().unwrap();
+        meta.root = txn.get_txn_root();
+        meta.last_page = txn.get_last_page();
+        meta.last_txn_id = txn.get_txn_id();
+
+        debug!("write meta to file {:?}", meta);
+
+        let buf = unsafe {std::slice::from_raw_parts(&meta as *const _ as *const u8, size_of::<DBMetaData>())};
+
+        let ofs = toggle_page * self.env_head.as_ref().unwrap().page_size + size_of::<PageHead>();
+        match self.fd.as_ref().unwrap().write_at(buf, ofs as u64) {
+            Ok(write_size) => {
+                if write_size < size_of::<DBMetaData>() {
+                    return Err(Errors::ShortWrite(write_size));
+                }
+            },
+            Err(e) => {return Err(Errors::StdWriteError(e));}
+        }
+
         Ok(())
     }
 
@@ -574,8 +636,7 @@ impl Env<'_> {
             debug!("get clean page {}", pageno);
             //let map_ptr: *mut u8 = self.mmap.as_mut().unwrap().as_mut().as_mut_ptr();
             let map_ptr: *mut u8 = self.mmap.as_ref().unwrap().as_ptr() as *mut u8;
-            let page_size = self.env_head.as_ref().unwrap().page_size;
-            Ok(unsafe {map_ptr.offset((pageno * page_size) as isize)})
+            Ok(unsafe {map_ptr.offset((pageno * self.get_page_size()) as isize)})
         }
     }
 

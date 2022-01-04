@@ -15,12 +15,14 @@ use std::fmt;
 use std::thread;
 use std::process;
 use std::cell::RefCell;
+use std::os::unix::prelude::FileExt;
+use std::alloc::dealloc;
 
 use crate::consts;
 use crate::errors::Errors;
 use crate::mdb::{Env, Pageno};
 use crate::page::{PageHead, DirtyPageHead};
-use crate::{debug, jump_head_ptr, jump_head, error, info};
+use crate::{debug, jump_head_ptr, jump_head, error, info, jump_head_mut, ptr_ref};
 use crate::flags::{TxnFlags, NodeFlags, OperationFlags};
 
 #[derive(Copy, Clone)]
@@ -147,7 +149,7 @@ impl<'a> Txn<'a> {
             //}
             //let mutex_guard = env.txn_info.as_ref().unwrap().write_mutex.lock().unwrap();
             let mutex_guard = env.lock_w_mutex();
-            debug!("write_mutex unlocked");
+            debug!("write_mutex locked");
 
             unsafe {
                 let env_ptr = Arc::as_ptr(env) as *mut Env;
@@ -227,25 +229,40 @@ impl<'a> Txn<'a> {
         Err(Errors::PageNotFound(pageno))
     }
 
+    #[inline]
     pub fn get_txn_flags(&self) -> TxnFlags {
         self.txn_flags
     }
 
+    #[inline]
     pub fn get_next_pageno(&self) -> Pageno {
         *self.txn_next_pgno.borrow()
     }
 
+    #[inline]
     pub fn add_next_pageno(&self, num: usize) {
         *self.txn_next_pgno.borrow_mut() += num;
     }
 
+    #[inline]
     pub fn update_root(&self, pageno: Pageno) -> Result<(), Errors> {
         *self.txn_root.borrow_mut() = pageno;
         Ok(())
     }
 
+    #[inline]
     pub fn get_txn_root(&self) -> Pageno {
         *self.txn_root.borrow()
+    }
+
+    #[inline]
+    pub fn get_last_page(&self) -> Pageno {
+        *self.txn_next_pgno.borrow() - 1
+    }
+
+    #[inline]
+    pub fn get_txn_id(&self) -> u32 {
+        self.txn_id
     }
 
     /**
@@ -317,6 +334,87 @@ impl<'a> Txn<'a> {
 
         self.env.add_entry();
 
+        Ok(())
+    }
+
+    /**
+     * commit a transaction
+     * 1. write all dirty pages to file
+     * 2. flush mmap
+     */
+    pub fn txn_commit(&mut self) -> Result<(), Errors> {
+        if self.txn_flags.is_set(consts::READ_ONLY_TXN) {
+            return Err(Errors::ReadOnlyTxnNotAllowed);
+        }
+
+        if self.txn_flags.is_broken() {
+            debug!("trying to commit a broken transaction, aborted");
+            self.txn_abort()?;
+        }
+
+        {
+            let dq: &mut mem::ManuallyDrop<VecDeque<NonNull<u8>>> = unsafe {
+                &mut self.u.borrow_mut().dirty_queue
+            };
+            while !dq.is_empty() {
+                let ptr = dq.pop_front().unwrap().as_ptr();
+                let dpage = ptr_ref!(ptr, DirtyPageHead);
+                let ph: &mut PageHead = jump_head_mut!(ptr, DirtyPageHead, PageHead);
+
+                assert!(ph.page_flags.is_set(consts::P_DIRTY));
+                ph.page_flags ^= consts::P_DIRTY;
+                assert!(!ph.page_flags.is_set(consts::P_DIRTY));
+                
+                let buf = unsafe {std::slice::from_raw_parts(ptr.offset(size_of::<DirtyPageHead>() as isize), self.env.get_page_size())};
+                let ofs = ph.pageno as u64 * self.env.get_page_size() as u64;
+
+                match self.env.fd.as_ref().unwrap().write_all_at(buf, ofs) {
+                    Ok(_) => {},
+                    Err(e) => {
+                        return Err(Errors::StdIOError(e));
+                    }
+                }
+                info!("write pageno {} back to file", ph.pageno);
+
+                unsafe {dealloc(ptr, dpage.layout);}
+            }
+        }
+
+        //sync written data to file
+        if let Err(e) = self.env.fd.as_ref().unwrap().sync_all() {
+            return Err(Errors::StdIOError(e));
+        }
+        //update metadata, important
+        if let Err(e) = self.env.env_write_meta(&self) {
+            return Err(e);
+        }
+        //sync written meta data to file 
+        if let Err(e) = self.env.fd.as_ref().unwrap().sync_all() {
+            return Err(Errors::StdIOError(e));
+        }
+        self.txn_abort()?;
+        Ok(())
+    }
+
+    pub fn txn_abort(&mut self) -> Result<(), Errors> {
+        debug!("abort transaction on root {}", self.txn_root.borrow());
+
+        if self.txn_flags.is_set(consts::READ_ONLY_TXN) {
+            self.env.del_reader(unsafe {self.u.borrow().reader})?;
+        } else {
+            let dq = unsafe {
+                &mut self.u.borrow_mut().dirty_queue
+            };
+            while !dq.is_empty() {
+                let ptr = dq.pop_front().unwrap().as_ptr();
+                let dpage = ptr_ref!(ptr, DirtyPageHead);
+                unsafe {dealloc(ptr, dpage.layout);}
+            }
+
+            unsafe {mem::ManuallyDrop::drop(dq);}
+            self.write_lock = None;
+        }
+        assert!(self.env.try_lock_w_mutex().is_ok());
         Ok(())
     }
 }

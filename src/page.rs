@@ -235,14 +235,14 @@ impl PageHead {
         let mut cmp_res: i32 = -2;
         let node_offsets = Array::<Indext>::new_jump_head(page_ptr);
 
-        debug!("low = {}, high = {}", low, high);
-
         while low <= high {
             mid = (low+high) >> 1;
+            debug!("low = {}, high = {}, ofs = {}", low, high, node_offsets[mid as usize]);
             assert!(mid >= 0);
             let mid_node = unsafe {&*(page_ptr.offset(node_offsets[mid as usize] as isize) as *const Node)};
             let mid_key = Val::new(mid_node.key_size, mid_node.key_data);
             
+            info!("mid_node for {}: {:?}", mid, mid_node);
             cmp_res = cmp_func(&key, &mid_key);
 
             if cmp_res < 0 {
@@ -266,6 +266,7 @@ impl PageHead {
             info!("key {} go with node {:?}", key.get_readable_data(), mid_node);
         }
 
+        debug!("searched index {}", mid);
         Ok(Some((mid as usize, cmp_res == 0)))
     }
 

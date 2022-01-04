@@ -124,7 +124,7 @@ macro_rules! offset_of {
 
 #[macro_export]
 macro_rules! ptr_ref {
-    ($ptr: ident, $type: ty) => {
+    ($ptr: tt, $type: ty) => {
         unsafe {
             &*($ptr as *const $type)
         }

@@ -36,6 +36,7 @@ fn test1() -> Result<(), Errors> {
 
 #[test]
 fn test2() -> Result<(), Errors> {
+    //let env = prepare_env(consts::READ_WRITE | consts::CREATE);
     let env = prepare_env(consts::READ_WRITE);
     
     let mut w_txn1 = Txn::new(&env, false)?;
@@ -56,5 +57,24 @@ fn test2() -> Result<(), Errors> {
         w_txn1.txn_put(key, val, consts::OP_NONE)?;
         info!("put {}", i);
     }
+    w_txn1.txn_commit()?;
     Ok(())
+}
+
+//#[test]
+fn test3() {
+    use crate::page::PageHead;
+    use crate::mdb::DBMetaData;
+    use memmap;
+    use crate::jump_head;
+    use std::mem::size_of;
+
+    let fd = std::fs::OpenOptions::new().read(true).write(true).open("test.db").unwrap();
+    let mmap = unsafe {memmap::MmapMut::map_mut(&fd).unwrap()};
+
+    let mut ptr = unsafe {mmap.as_ptr().offset(4096)};
+    let meta1 = crate::jump_head_mut!(ptr, PageHead, DBMetaData);
+
+    let meta11 = crate::jump_head!(ptr, PageHead, DBMetaData);
+    println!("meta1: {:?}", meta11);
 }

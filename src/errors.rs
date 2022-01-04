@@ -16,6 +16,7 @@ pub enum Errors {
     StdFileError(io::Error),
     StdReadError(io::Error),
     StdWriteError(io::Error),
+    MMapFlushError(io::Error),
     ShortRead(usize),
     ShortWrite(usize),
     //CreateExistFile(String),
