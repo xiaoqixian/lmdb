@@ -34,7 +34,7 @@ pub struct PageBounds {
     pub lower_bound: usize,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 pub struct PageHead {
     pub pageno: Pageno,
     pub page_flags: PageFlags,
@@ -57,7 +57,7 @@ pub struct PageParent {
 /**
  * To present a dirty page or a group of dirty pages.
  */
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct DirtyPageHead {
     pub parent: *mut u8,
     pub index: usize, //index that this page in it's parent page.
@@ -78,20 +78,51 @@ pub struct Node {
     pub u: PagenoDatasize,
     pub node_flags: NodeFlags,
     pub key_size: usize, //key_size could be zero, but only when it's a branch node and insert index is zero.
-    pub key_data: *mut u8, //could be null when it's a branch node and it's index is 0.
-    pub val_data: *mut u8 //could be null when it's a branch node
+}
+
+impl fmt::Debug for PageHead {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("PageHead")
+            .field("pageno", if self.pageno == consts::P_INVALID {&"P_INVALID"} else {&self.pageno})
+            .field("page_flags", &self.page_flags)
+            .field("page_bounds", &self.page_bounds)
+            .field("overflow_pages", &self.overflow_pages)
+            .finish()
+    }
+}
+
+impl fmt::Debug for DirtyPageHead {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let parent_pageno = if self.parent.is_null() {consts::P_INVALID} else {PageHead::get_pageno(self.parent)};
+
+        f.debug_struct("DirtyPageHead")
+            .field("parent", if parent_pageno == consts::P_INVALID {
+                &"null"
+            } else {
+                &parent_pageno
+            })
+            .field("index", if self.index == std::usize::MAX {&"None"} else {&self.index})
+            .field("num", &self.num)
+            .field("layout", &self.layout)
+            .finish()
+    }
 }
 
 impl fmt::Debug for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = std::str::from_utf8(unsafe {std::slice::from_raw_parts(self.key_data, self.key_size)}).unwrap();
-        f.debug_struct("Node")
-            .field("node_flags", &self.node_flags)
-            .field("key", if self.key_size == 0 {
-                &"None"
-            } else {
-                &s
-            }).finish()
+        if self.key_size != 0 {
+            let key_data = unsafe {(self as *const Self).offset(1) as *const u8};
+            let s = std::str::from_utf8(unsafe {std::slice::from_raw_parts(key_data, self.key_size)}).unwrap();
+            f.debug_struct("Node")
+                .field("node_flags", &self.node_flags)
+                .field("key", &s)
+                .finish()
+        } else {
+            f.debug_struct("Node")
+                .field("node_flags", &self.node_flags)
+                .field("key", &"None")
+                .finish()
+        }
     }
 }
 
@@ -164,10 +195,23 @@ impl PageHead {
         }
     }
 
+
     pub fn get_info(page_ptr: *mut u8) -> String {
+        String::from("fuck")
+    }
+
+    pub fn show_info(page_ptr: *mut u8) {
         assert!(!page_ptr.is_null());
-        let page = unsafe {&*(page_ptr as *const PageHead)};
-        String::from(format!("Page {{ pageno: {}, flags: {:#X}, lower_bound: {}, upper_bound: {}, overflow_pages: {}  }}", page.pageno, page.page_flags, page.page_bounds.lower_bound, page.page_bounds.upper_bound, page.overflow_pages))
+        if Self::is_set(page_ptr, consts::P_BRANCH) {
+            println!("head: {:?}", unsafe {&*(page_ptr as *const Self)});
+            println!("nodes: ");
+            let arr = Array::<Indext>::new_jump_head(page_ptr);
+            let num_keys = Self::num_keys(page_ptr);
+
+            for i in 0..num_keys {
+                println!("ofs = {}, {:?}", arr[i], unsafe {ptr::read(page_ptr.offset(arr[i] as isize) as *const Node)});
+            }
+        }
     }
 
     pub fn num_keys(page_ptr: *mut u8) -> usize {
@@ -192,7 +236,7 @@ impl PageHead {
      */
     pub fn update_child(parent: *mut u8, pageno: Pageno, index: usize) -> Result<(), Errors> {
         if !Self::is_set(parent, consts::P_BRANCH) {
-            return Err(Errors::InvalidPageType(PageHead::get_info(parent)));
+            return Err(Errors::InvalidPageType(format!("{:?}", parent)));
         }
 
         //let node_offset = unsafe {*(parent.offset((size_of::<PageHead>() + index*size_of::<Indext>()) as isize) as *const Indext) as isize};
@@ -203,14 +247,32 @@ impl PageHead {
         Ok(())
     }
 
-    pub fn get_node(page_ptr: *mut u8, index: usize) -> Result<Node, Errors> {
+    pub fn get_node_ptr(page_ptr: *mut u8, index: usize) -> Result<*const Node, Errors> {
         let num_keys = Self::num_keys(page_ptr);
         if index >= num_keys {
             error!("Node index overflow, num_keys: {}, index: {}", num_keys, index);
             return Err(Errors::IndexOverflow(index));
         }
         let ptrs = Array::<Indext>::new(unsafe {page_ptr.offset(size_of::<PageHead>() as isize)});
-        Ok(unsafe {*(page_ptr.offset(ptrs[index] as isize) as *const Node)})
+        Ok(unsafe {page_ptr.offset(ptrs[index] as isize) as *const Node})
+    }
+
+    /**
+     * get a copy of a node.
+     */
+    pub fn get_node(page_ptr: *mut u8, index: usize) -> Result<Node, Errors> {
+        let node_ptr = Self::get_node_ptr(page_ptr, index)?;
+        Ok(unsafe {*node_ptr})
+    }
+
+    pub fn get_key(page_ptr: *mut u8, index: usize) -> Result<Val, Errors> {
+        let node_ptr = Self::get_node_ptr(page_ptr, index)?;
+        let key_size = unsafe {(*node_ptr).key_size};
+        if key_size == 0 {
+            Ok(Val {size: 0, data: ptr::null_mut()})
+        } else {
+            Ok(unsafe {Val {size: key_size, data: node_ptr.offset(1) as *mut u8}})
+        }
     }
 
     pub fn left_space(page_ptr: *mut u8) -> usize {
@@ -228,21 +290,24 @@ impl PageHead {
      * If the key is greater than all child nodes in this page, then return Ok(None).
      */
     pub fn search_node(page_ptr: *mut u8, key: &Val, cmp_func: &CmpFunc) -> Result<Option<(usize, bool)>, Errors> {
-        info!("search_node for {}", key.get_readable_data());
+        info!("search_node for {} on page {}, address {:?}", key.get_readable_data(), Self::get_pageno(page_ptr), page_ptr);
         let mut low: i32 = if PageHead::is_set(page_ptr, consts::P_LEAF) {0} else {1};
         let mut high: i32 = PageHead::num_keys(page_ptr) as i32 - 1;
         let mut mid: i32 = -1;
         let mut cmp_res: i32 = -2;
         let node_offsets = Array::<Indext>::new_jump_head(page_ptr);
 
+        print!("node_offsets: "); node_offsets.show(Self::num_keys(page_ptr));
+
         while low <= high {
             mid = (low+high) >> 1;
-            debug!("low = {}, high = {}, ofs = {}", low, high, node_offsets[mid as usize]);
+            let ofs = node_offsets[mid as usize] as isize;
+            debug!("low = {}, high = {}, ofs = {}", low, high, ofs);
             assert!(mid >= 0);
-            let mid_node = unsafe {&*(page_ptr.offset(node_offsets[mid as usize] as isize) as *const Node)};
-            let mid_key = Val::new(mid_node.key_size, mid_node.key_data);
-            
+            let mid_node = unsafe {&*(page_ptr.offset(ofs) as *const Node)};
             info!("mid_node for {}: {:?}", mid, mid_node);
+            let mid_key = Val::new(mid_node.key_size, unsafe {page_ptr.offset(ofs + size_of::<Node>() as isize)});
+            
             cmp_res = cmp_func(&key, &mid_key);
 
             if cmp_res < 0 {
@@ -283,8 +348,10 @@ impl PageHead {
      */
     pub fn add_node(page_ptr: *mut u8, key: Option<&Val>, val: Option<&Val>, pageno: Option<Pageno>, index: usize, f: NodeFlags, txn: &Txn) -> Result<(), Errors> {
         assert_ne!(val.is_none(), pageno.is_none());
+        debug!("index: {}, PageHead::is_set(P_BRANCH): {}, key.is_none(): {}", index, PageHead::is_set(page_ptr, consts::P_BRANCH), key.is_none());
         assert_eq!(index == 0 && PageHead::is_set(page_ptr, consts::P_BRANCH), key.is_none());
 
+        info!("add node on page {} at index {} with key {:?}", Self::get_pageno(page_ptr), index, key);
         let mut flags = f; // as rust doesn't allow mutable paprameters
         let page_size = txn.env.get_page_size();
         let key_size = match key {
@@ -336,18 +403,16 @@ impl PageHead {
         let node = unsafe {&mut *(page_ptr.offset(ofs as isize) as *mut Node)};
         node.key_size = key_size;
         node.node_flags = flags;
-        node.key_data = match key {
-            None => ptr::null_mut(),
-            Some(v) => {
-                unsafe {
-                    let key_ptr = page_ptr.offset((ofs + size_of::<Node>()) as isize);
-                    ptr::copy_nonoverlapping(v.data, key_ptr, v.size);//copy key data to page.
-                    key_ptr
-                }
+
+        //copy key
+        if let Some(k) = key {
+            unsafe {
+                let key_data = page_ptr.offset((ofs + size_of::<Node>()) as isize);
+                ptr::copy_nonoverlapping(k.data, key_data, k.size);
             }
-        };
-        node.val_data = ptr::null_mut();
+        }
         
+        //copy data or set overflow pagenumber.
         if PageHead::is_set(page_ptr, consts::P_LEAF) {
             if flags.is_set(consts::V_BIGDATA) {
                 node.u.datasize = size_of::<Pageno>();
@@ -359,6 +424,7 @@ impl PageHead {
                     unsafe {
                         ptr::copy_nonoverlapping(&page.pageno as *const _ as *const u8, page_ptr.offset((ofs + size_of::<Node>() + key.unwrap().size) as isize), size_of::<Pageno>());
 
+
                         //copy val data to overflow_pages
                         ptr::copy_nonoverlapping(val.unwrap().data, ofp.offset((size_of::<DirtyPageHead>() + size_of::<PageHead>()) as isize), val.unwrap().size);
                     }
@@ -367,8 +433,7 @@ impl PageHead {
                 node.u.datasize = val.unwrap().size;
                 //copy val data
                 unsafe {
-                    node.val_data = page_ptr.offset((ofs + size_of::<Node>() + key.unwrap().size) as isize);
-                    ptr::copy_nonoverlapping(val.unwrap().data, node.val_data, val.unwrap().size);
+                    ptr::copy_nonoverlapping(val.unwrap().data, page_ptr.offset((ofs + size_of::<Node>() + key_size) as isize), val.unwrap().size);
                 }
             }
 

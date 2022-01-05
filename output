@@ -1,0 +1,1587 @@
+
+running 1 test
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::env_open:388] Creating new database file: test.db[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::env_open:404] mapped length: 12288[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:636] get clean page 1[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:636] get clean page 2[0m
+[38;5;12m[INFO src/mdb.rs:586] meta1: DBMetaData { db_stat: DBStat { page_size: 4096, depth: 0, branch_pages: 0, leaf_pages: 0, overflow_pages: 0, entries: 0 }, root: "P_INVALID", last_page: 2, last_txn_id: 0 }[0m
+[38;5;12m[INFO src/mdb.rs:587] meta2: DBMetaData { db_stat: DBStat { page_size: 4096, depth: 0, branch_pages: 0, leaf_pages: 0, overflow_pages: 0, entries: 0 }, root: "P_INVALID", last_page: 2, last_txn_id: 0 }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::env_read_meta:595] Using meta page 1[0m
+[38;5;11m[DEBUG src/txn.rs:lmdb::txn::Txn::new:146] try to lock write_mutex[0m
+[38;5;11m[DEBUG src/txn.rs:lmdb::txn::Txn::new:152] write_mutex locked[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:636] get clean page 1[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:636] get clean page 2[0m
+[38;5;12m[INFO src/mdb.rs:586] meta1: DBMetaData { db_stat: DBStat { page_size: 4096, depth: 0, branch_pages: 0, leaf_pages: 0, overflow_pages: 0, entries: 0 }, root: "P_INVALID", last_page: 2, last_txn_id: 0 }[0m
+[38;5;12m[INFO src/mdb.rs:587] meta2: DBMetaData { db_stat: DBStat { page_size: 4096, depth: 0, branch_pages: 0, leaf_pages: 0, overflow_pages: 0, entries: 0 }, root: "P_INVALID", last_page: 2, last_txn_id: 0 }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::env_read_meta:595] Using meta page 1[0m
+[38;5;11m[DEBUG src/txn.rs:lmdb::txn::Txn::new:183] begin a write transaction 1 on root 18446744073709551615[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 18446744073709551615[0m
+[38;5;11m[DEBUG src/txn.rs:lmdb::txn::Txn::txn_put:323] allocating a new root page[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3913 for index 0 in 3[0m
+[38;5;11m[DEBUG src/txn.rs:lmdb::txn::Txn::txn_put:328] new txn_root: 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 0[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key41, size = 1 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 0, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 0: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3730 for index 0 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 1[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key02, size = 2 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 1, ofs = 3730[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 0: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3547 for index 1 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 2[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key23, size = 3 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 2, ofs = 3547[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3364 for index 2 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key54, size = 4 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 3, ofs = 3547[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 3, ofs = 3364[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3181 for index 3 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key29, size = 9 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 4, ofs = 3364[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 4, ofs = 3181[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 4, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2998 for index 4 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key08, size = 8 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 5, ofs = 3364[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 5, ofs = 2998[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 5, high = 5, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2815 for index 5 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key27, size = 7 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 6, ofs = 3181[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 6, ofs = 2815[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 6, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2632 for index 6 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key26, size = 6 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 7, ofs = 3181[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 7, ofs = 2815[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 7, ofs = 2632[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 7, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2449 for index 7 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key45, size = 5 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 8, ofs = 2998[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 5, high = 8, ofs = 2632[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 8, ofs = 2449[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 8, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2266 for index 8 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 9[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key910, size = 10 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 9, ofs = 2998[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 5, high = 9, ofs = 2449[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 9, ofs = 2266[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 9, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2079 for index 9 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 10[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key911, size = 11 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 2079, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 10, ofs = 2815[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 10, ofs = 2266[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 10, ofs = 2079[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 10, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1892 for index 10 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 11[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key012, size = 12 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 2079, 1892, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 11, ofs = 2815[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 11, ofs = 2266[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 11, ofs = 1892[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 11, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1705 for index 11 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 12[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key513, size = 13 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 2079, 1892, 1705, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 12, ofs = 2632[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 12, ofs = 2079[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 12, ofs = 1705[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 12, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1518 for index 12 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 13[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key714, size = 14 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 2079, 1892, 1705, 1518, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 13, ofs = 2632[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 13, ofs = 1892[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 13, ofs = 1518[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 13, high = 13, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1331 for index 13 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 14[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key119, size = 19 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 2079, 1892, 1705, 1518, 1331, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 14, ofs = 2449[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 14, ofs = 1705[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 14, ofs = 1331[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 14, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1144 for index 14 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 15[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key418, size = 18 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 2079, 1892, 1705, 1518, 1331, 1144, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 15, ofs = 2449[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 15, ofs = 1705[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 15, ofs = 1331[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 15, ofs = 1144[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 15, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 957 for index 15 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 16[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key517, size = 17 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 2079, 1892, 1705, 1518, 1331, 1144, 957, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 16, ofs = 2266[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 16, ofs = 1518[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 13, high = 16, ofs = 1144[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 16, ofs = 957[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 16, high = 16, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 770 for index 16 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 17[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key216, size = 16 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 2079, 1892, 1705, 1518, 1331, 1144, 957, 770, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 17, ofs = 2266[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 17, ofs = 1331[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 17, ofs = 957[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 16, high = 17, ofs = 770[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 17, high = 17, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 17: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 583 for index 17 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key715, size = 15 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 2079, 1892, 1705, 1518, 1331, 1144, 957, 770, 583, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 18, ofs = 2079[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 18, ofs = 1144[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 18, ofs = 770[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 17, high = 18, ofs = 583[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 17: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 18, high = 18, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 18: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 396 for index 18 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 19[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key320, size = 20 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 2079, 1892, 1705, 1518, 1331, 1144, 957, 770, 583, 396, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 19, ofs = 2079[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 19, ofs = 1144[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 19, ofs = 583[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 17: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 18, high = 19, ofs = 396[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 18: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 19, high = 19, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 19: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 209 for index 19 in 3[0m
+[38;5;12m[INFO src/tests.rs:59] put 20[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x18[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 18446744073709551615[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key121, size = 21 on page 3, address 0x7f6b20002788[0m
+node_offsets: [3730, 3547, 3364, 3181, 2998, 2815, 2632, 2449, 2266, 2079, 1892, 1705, 1518, 1331, 1144, 957, 770, 583, 396, 209, 3913]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 20, ofs = 1892[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 20, ofs = 957[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 16, high = 20, ofs = 396[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 18: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 19, high = 20, ofs = 209[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 19: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 20, high = 20, ofs = 3913[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 20: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:383] page no enough space for another node[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:384] page_bounds: PageBounds { upper_bound: 209, lower_bound: 82 }, node_size: 187[0m
+[38;5;11m[DEBUG src/txn.rs:lmdb::txn::Txn::txn_put:312] add node no space[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::split:861] splitting page 3[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::split:872] B+ tree depth increases 1[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::split:877] root split! new root = 4[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 4072 for index 0 in 4[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 4031 for index 1 in 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::split:933] add right sibling node 5 at split_index 11[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3913 for index 0 in 3[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3730 for index 1 in 3[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3547 for index 2 in 3[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3364 for index 3 in 3[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3181 for index 4 in 3[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2998 for index 5 in 3[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2815 for index 6 in 3[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2632 for index 7 in 3[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2449 for index 8 in 3[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2262 for index 9 in 3[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2075 for index 10 in 3[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3909 for index 0 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3722 for index 1 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3535 for index 2 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3348 for index 3 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3161 for index 4 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2974 for index 5 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2787 for index 6 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2600 for index 7 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2413 for index 8 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2226 for index 9 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2043 for index 10 in 5[0m
+[38;5;12m[INFO src/tests.rs:59] put 21[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key322, size = 22 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 1 for key "key322, size = 22"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 1[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key322, size = 22 on page 5, address 0x7f6b20006488[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 10, ofs = 2974[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 10, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 10, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 10, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1856 for index 10 in 5[0m
+[38;5;12m[INFO src/tests.rs:59] put 22[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key023, size = 23 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 1 for key "key023, size = 23"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 1[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key023, size = 23 on page 5, address 0x7f6b20006488[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 11, ofs = 2974[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 11, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 11, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 11, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1669 for index 11 in 5[0m
+[38;5;12m[INFO src/tests.rs:59] put 23[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key124, size = 24 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 1 for key "key124, size = 24"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 1[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key124, size = 24 on page 5, address 0x7f6b20006488[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 12, ofs = 2787[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 12, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 12, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 12, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1482 for index 12 in 5[0m
+[38;5;12m[INFO src/tests.rs:59] put 24[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key029, size = 29 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 1 for key "key029, size = 29"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 1[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key029, size = 29 on page 5, address 0x7f6b20006488[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 13, ofs = 2787[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 13, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 13, ofs = 1482[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 13, high = 13, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1295 for index 13 in 5[0m
+[38;5;12m[INFO src/tests.rs:59] put 25[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key328, size = 28 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 1 for key "key328, size = 28"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 1[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key328, size = 28 on page 5, address 0x7f6b20006488[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 14, ofs = 2600[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 14, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 14, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 14, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1108 for index 14 in 5[0m
+[38;5;12m[INFO src/tests.rs:59] put 26[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key927, size = 27 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 1 for key "key927, size = 27"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 1[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key927, size = 27 on page 5, address 0x7f6b20006488[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 15, ofs = 2600[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 15, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 15, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 15, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 15, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 921 for index 15 in 5[0m
+[38;5;12m[INFO src/tests.rs:59] put 27[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key826, size = 26 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 1 for key "key826, size = 26"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 1[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key826, size = 26 on page 5, address 0x7f6b20006488[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 921, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 16, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 16, ofs = 1482[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 13, high = 16, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 16, ofs = 921[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 16, high = 16, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 734 for index 16 in 5[0m
+[38;5;12m[INFO src/tests.rs:59] put 28[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key625, size = 25 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 1 for key "key625, size = 25"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 1[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key625, size = 25 on page 5, address 0x7f6b20006488[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 921, 734, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 17, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 17, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 17, ofs = 921[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 16, high = 17, ofs = 734[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 17, high = 17, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 17: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 547 for index 17 in 5[0m
+[38;5;12m[INFO src/tests.rs:59] put 29[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key630, size = 30 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 1 for key "key630, size = 30"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 1[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key630, size = 30 on page 5, address 0x7f6b20006488[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 921, 734, 547, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 18, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 18, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 18, ofs = 734[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 17, high = 18, ofs = 547[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 17: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 18, high = 18, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 18: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 360 for index 18 in 5[0m
+[38;5;12m[INFO src/tests.rs:59] put 30[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key331, size = 31 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 1 for key "key331, size = 31"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 1[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key331, size = 31 on page 5, address 0x7f6b20006488[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 921, 734, 547, 360, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 19, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 19, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 19, ofs = 547[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 17: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 18, high = 19, ofs = 360[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 18: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 19, high = 19, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 19: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 173 for index 19 in 5[0m
+[38;5;12m[INFO src/tests.rs:59] put 31[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key432, size = 32 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 1, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 1 for key "key432, size = 32"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 5[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 1[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key432, size = 32 on page 5, address 0x7f6b20006488[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 921, 734, 547, 360, 173, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 20, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 20, ofs = 921[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 16, high = 20, ofs = 360[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 18: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 19, high = 20, ofs = 173[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 19: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 20, high = 20, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 20: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:383] page no enough space for another node[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:384] page_bounds: PageBounds { upper_bound: 173, lower_bound: 82 }, node_size: 187[0m
+[38;5;11m[DEBUG src/txn.rs:lmdb::txn::Txn::txn_put:312] add node no space[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::split:861] splitting page 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3990 for index 2 in 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::split:933] add right sibling node 6 at split_index 11[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3909 for index 0 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3722 for index 1 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3535 for index 2 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3348 for index 3 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3161 for index 4 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2974 for index 5 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2787 for index 6 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2600 for index 7 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2413 for index 8 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2226 for index 9 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2039 for index 10 in 5[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3909 for index 0 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3722 for index 1 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3535 for index 2 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3348 for index 3 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3161 for index 4 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2974 for index 5 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2787 for index 6 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2600 for index 7 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2413 for index 8 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2226 for index 9 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2043 for index 10 in 6[0m
+[38;5;12m[INFO src/tests.rs:59] put 32[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key033, size = 33 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 2, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 2 for key "key033, size = 33"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 2[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key033, size = 33 on page 6, address 0x7f6b200084c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 10, ofs = 2974[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 10, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 10, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [95, 102, 108, 97, 103, 115, 58, 32, 78, 111, 100, 101, 70, 108, 97, 103, 115] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 10, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 131] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1856 for index 10 in 6[0m
+[38;5;12m[INFO src/tests.rs:59] put 33[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key134, size = 34 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 2, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 2 for key "key134, size = 34"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 2[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key134, size = 34 on page 6, address 0x7f6b200084c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 11, ofs = 2974[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 11, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 11, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80, 97] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 9, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [95, 102, 108, 97, 103, 115, 58, 32, 78, 111, 100, 101, 70, 108, 97, 103, 115] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 10[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1669 for index 10 in 6[0m
+[38;5;12m[INFO src/tests.rs:59] put 34[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key439, size = 39 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 2, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 2 for key "key439, size = 39"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 2[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key439, size = 39 on page 6, address 0x7f6b200084c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1669, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 12, ofs = 2787[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 12, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [95, 102, 108, 97, 103, 115, 58, 32, 78, 111, 100, 101, 70, 108, 97, 103, 115] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 12, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80, 97] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 10, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [93, 32, 115, 101, 116, 32, 111, 102, 115, 32, 50, 55, 56, 55, 32, 102, 111] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 11[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1482 for index 11 in 6[0m
+[38;5;12m[INFO src/tests.rs:59] put 35[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key238, size = 38 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 2, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 2 for key "key238, size = 38"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 2[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key238, size = 38 on page 6, address 0x7f6b200084c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1669, 1482, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 13, ofs = 2787[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 13, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [93, 32, 115, 101, 116, 32, 111, 102, 115, 32, 50, 55, 56, 55, 32, 102, 111] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 13, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80, 97] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 11, ofs = 1482[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 81, 133, 1] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 12[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1295 for index 12 in 6[0m
+[38;5;12m[INFO src/tests.rs:59] put 36[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key237, size = 37 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 2, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 2 for key "key237, size = 37"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 2[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key237, size = 37 on page 6, address 0x7f6b200084c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1669, 1482, 1295, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 14, ofs = 2600[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 14, ofs = 1482[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 81, 133, 1] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 14, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80, 97] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 12, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [46, 114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 13[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1108 for index 13 in 6[0m
+[38;5;12m[INFO src/tests.rs:59] put 37[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key536, size = 36 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 2, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 2 for key "key536, size = 36"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 2[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key536, size = 36 on page 6, address 0x7f6b200084c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1669, 1482, 1295, 1108, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 15, ofs = 2600[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 15, ofs = 1482[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 81, 133, 1] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 15, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [57, 93, 32, 115, 101, 116, 32, 111, 102, 115, 32, 51, 55, 50, 50, 32, 102] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 15, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80, 97] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 14[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 921 for index 14 in 6[0m
+[38;5;12m[INFO src/tests.rs:59] put 38[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key835, size = 35 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 2, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 2 for key "key835, size = 35"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 2[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key835, size = 35 on page 6, address 0x7f6b200084c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1669, 1482, 1295, 1108, 921, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 16, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 16, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [46, 114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 13, high = 16, ofs = 921[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 129, 135] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 16, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80, 97] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 15[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 734 for index 15 in 6[0m
+[38;5;12m[INFO src/tests.rs:59] put 39[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key240, size = 40 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 2, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 2 for key "key240, size = 40"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 2[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key240, size = 40 on page 6, address 0x7f6b200084c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1669, 1482, 1295, 1108, 921, 734, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 17, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 17, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [57, 93, 32, 115, 101, 116, 32, 111, 102, 115, 32, 51, 55, 50, 50, 32, 102] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 17, ofs = 734[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [101, 46, 114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 16, high = 17, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80, 97] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 16[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 547 for index 16 in 6[0m
+[38;5;12m[INFO src/tests.rs:59] put 40[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key741, size = 41 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 2, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 2 for key "key741, size = 41"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 2[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key741, size = 41 on page 6, address 0x7f6b200084c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1669, 1482, 1295, 1108, 921, 734, 547, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 18, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [95, 102, 108, 97, 103, 115, 58, 32, 78, 111, 100, 101, 70, 108, 97, 103, 115] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 18, ofs = 921[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 129, 135] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 18, ofs = 547[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [57, 57, 93, 32, 115, 101, 116, 32, 111, 102, 115, 32, 50, 54, 51, 50, 32] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 17, high = 18, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 17: Node { node_flags: NodeFlags { inner: 0 }, key: [114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80, 97] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 17[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 360 for index 17 in 6[0m
+[38;5;12m[INFO src/tests.rs:59] put 41[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key642, size = 42 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 2, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 2 for key "key642, size = 42"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 2[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key642, size = 42 on page 6, address 0x7f6b200084c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1669, 1482, 1295, 1108, 921, 734, 547, 360, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 19, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [95, 102, 108, 97, 103, 115, 58, 32, 78, 111, 100, 101, 70, 108, 97, 103, 115] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 19, ofs = 921[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 129, 135] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 19, ofs = 360[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 17: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 177] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 18, high = 19, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 18: Node { node_flags: NodeFlags { inner: 0 }, key: [114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80, 97] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 18[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 173 for index 18 in 6[0m
+[38;5;12m[INFO src/tests.rs:59] put 42[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key143, size = 43 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 2, ofs = 4031[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 1: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 2, high = 2, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 2 for key "key143, size = 43"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 6[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 2[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key143, size = 43 on page 6, address 0x7f6b200084c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1669, 1482, 1295, 1108, 921, 734, 547, 360, 173, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 20, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [93, 32, 115, 101, 116, 32, 111, 102, 115, 32, 50, 55, 56, 55, 32, 102, 111] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 20, ofs = 734[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [101, 46, 114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 16, high = 20, ofs = 173[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 18: Node { node_flags: NodeFlags { inner: 0 }, key: [101, 46, 114, 115, 58, 51, 48, 56, 93, 32, 109, 105, 100, 95, 110, 111, 100] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 19, high = 20, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 19: Node { node_flags: NodeFlags { inner: 0 }, key: [114, 115, 58, 108, 109, 100, 98, 58, 58, 112, 97, 103, 101, 58, 58, 80, 97] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 19[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:383] page no enough space for another node[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:384] page_bounds: PageBounds { upper_bound: 173, lower_bound: 82 }, node_size: 187[0m
+[38;5;11m[DEBUG src/txn.rs:lmdb::txn::Txn::txn_put:312] add node no space[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::split:861] splitting page 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3949 for index 3 in 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::split:933] add right sibling node 7 at split_index 11[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3909 for index 0 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3722 for index 1 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3535 for index 2 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3348 for index 3 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3161 for index 4 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2974 for index 5 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2787 for index 6 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2600 for index 7 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2413 for index 8 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2226 for index 9 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2039 for index 10 in 6[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3909 for index 0 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3722 for index 1 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3535 for index 2 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3348 for index 3 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3161 for index 4 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2974 for index 5 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2787 for index 6 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2600 for index 7 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2413 for index 8 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2226 for index 9 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2043 for index 10 in 7[0m
+[38;5;12m[INFO src/tests.rs:59] put 43[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key044, size = 44 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 3, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 3 for key "key044, size = 44"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 3[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key044, size = 44 on page 7, address 0x7f6b2000a0c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 10, ofs = 2974[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 10, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 10, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 10, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1856 for index 10 in 7[0m
+[38;5;12m[INFO src/tests.rs:59] put 44[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key449, size = 49 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 3, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 3 for key "key449, size = 49"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 3[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key449, size = 49 on page 7, address 0x7f6b2000a0c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 11, ofs = 2974[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 11, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 11, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 11, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1669 for index 11 in 7[0m
+[38;5;12m[INFO src/tests.rs:59] put 45[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key848, size = 48 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 3, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 3 for key "key848, size = 48"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 3[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key848, size = 48 on page 7, address 0x7f6b2000a0c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 12, ofs = 2787[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 12, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 12, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 12, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1482 for index 12 in 7[0m
+[38;5;12m[INFO src/tests.rs:59] put 46[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key747, size = 47 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 3, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 3 for key "key747, size = 47"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 3[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key747, size = 47 on page 7, address 0x7f6b2000a0c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 13, ofs = 2787[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 13, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 13, ofs = 1482[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 13, high = 13, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1295 for index 13 in 7[0m
+[38;5;12m[INFO src/tests.rs:59] put 47[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key746, size = 46 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 3, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 3 for key "key746, size = 46"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 3[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key746, size = 46 on page 7, address 0x7f6b2000a0c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 14, ofs = 2600[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 14, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 14, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 14, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1108 for index 14 in 7[0m
+[38;5;12m[INFO src/tests.rs:59] put 48[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key845, size = 45 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 3, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 3 for key "key845, size = 45"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 3[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key845, size = 45 on page 7, address 0x7f6b2000a0c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 15, ofs = 2600[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 15, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 15, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 15, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 15, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 921 for index 15 in 7[0m
+[38;5;12m[INFO src/tests.rs:59] put 49[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key950, size = 50 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 3, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 3 for key "key950, size = 50"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 3[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key950, size = 50 on page 7, address 0x7f6b2000a0c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 921, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 16, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 16, ofs = 1482[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 13, high = 16, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 16, ofs = 921[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [119, 111, 114, 100, 115, 32, 116, 111, 32, 115, 116, 117, 102, 102, 32, 109, 121] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 15[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 734 for index 15 in 7[0m
+[38;5;12m[INFO src/tests.rs:59] put 50[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key651, size = 51 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 3, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 3 for key "key651, size = 51"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 3[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key651, size = 51 on page 7, address 0x7f6b2000a0c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 734, 921, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 17, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 17, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 17, ofs = 734[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [119, 111, 114, 100, 115, 32, 116, 111, 32, 115, 116, 117, 102, 102, 32, 109, 121] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 14, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 15[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 547 for index 15 in 7[0m
+[38;5;12m[INFO src/tests.rs:59] put 51[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key252, size = 52 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 3, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 3 for key "key252, size = 52"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 3[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key252, size = 52 on page 7, address 0x7f6b2000a0c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 547, 734, 921, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 18, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 18, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 18, ofs = 734[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [119, 111, 114, 100, 115, 32, 116, 111, 32, 115, 116, 117, 102, 102, 32, 109, 121] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 15, ofs = 547[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [119, 111, 114, 100, 115, 32, 116, 111, 32, 115, 116, 117, 102, 102, 32, 109, 121] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 15[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 360 for index 15 in 7[0m
+[38;5;12m[INFO src/tests.rs:59] put 52[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key553, size = 53 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 3, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 3 for key "key553, size = 53"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 3[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key553, size = 53 on page 7, address 0x7f6b2000a0c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 360, 547, 734, 921, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 19, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 19, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 19, ofs = 734[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 17: Node { node_flags: NodeFlags { inner: 0 }, key: [119, 111, 114, 100, 115, 32, 116, 111, 32, 115, 116, 117, 102, 102, 32, 109, 121] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 16, ofs = 360[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [193, 109, 1, 0, 0, 0, 0, 0, 32, 115, 116, 117, 102, 102, 32, 109, 121] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 15[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 173 for index 15 in 7[0m
+[38;5;12m[INFO src/tests.rs:59] put 53[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key854, size = 54 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 3, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 3, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 3 for key "key854, size = 54"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 7[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 3[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key854, size = 54 on page 7, address 0x7f6b2000a0c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 173, 360, 547, 734, 921, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 20, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 20, ofs = 173[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [119, 111, 114, 100, 115, 32, 116, 111, 32, 115, 116, 113, 110, 1, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 14, ofs = 1482[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 13, high = 14, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 14, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:334] searched index 15[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:383] page no enough space for another node[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:384] page_bounds: PageBounds { upper_bound: 173, lower_bound: 82 }, node_size: 187[0m
+[38;5;11m[DEBUG src/txn.rs:lmdb::txn::Txn::txn_put:312] add node no space[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::split:861] splitting page 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3908 for index 4 in 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::split:933] add right sibling node 8 at split_index 11[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3909 for index 0 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3722 for index 1 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3535 for index 2 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3348 for index 3 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3161 for index 4 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2974 for index 5 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2787 for index 6 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2600 for index 7 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2413 for index 8 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2226 for index 9 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2039 for index 10 in 7[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3909 for index 0 in 8[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3722 for index 1 in 8[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3535 for index 2 in 8[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3348 for index 3 in 8[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 3161 for index 4 in 8[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2974 for index 5 in 8[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2787 for index 6 in 8[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2600 for index 7 in 8[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2413 for index 8 in 8[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2226 for index 9 in 8[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 2043 for index 10 in 8[0m
+[38;5;12m[INFO src/tests.rs:59] put 54[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key859, size = 59 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949, 3908]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 4, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 4, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 4, ofs = 3908[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 4 for key "key859, size = 59"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 4[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key859, size = 59 on page 8, address 0x7f6b2000c5c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 10, ofs = 2974[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 10, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 10, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 10, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1856 for index 10 in 8[0m
+[38;5;12m[INFO src/tests.rs:59] put 55[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key558, size = 58 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949, 3908]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 4, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 4, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 4, ofs = 3908[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 4 for key "key558, size = 58"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 4[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key558, size = 58 on page 8, address 0x7f6b2000c5c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 11, ofs = 2974[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 5: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 6, high = 11, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 11, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 11, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1669 for index 11 in 8[0m
+[38;5;12m[INFO src/tests.rs:59] put 56[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key357, size = 57 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949, 3908]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 4, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 4, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 4, ofs = 3908[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 4 for key "key357, size = 57"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 4[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key357, size = 57 on page 8, address 0x7f6b2000c5c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 12, ofs = 2787[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 12, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 12, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 12, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1482 for index 12 in 8[0m
+[38;5;12m[INFO src/tests.rs:59] put 57[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key656, size = 56 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949, 3908]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 4, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 4, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 4, ofs = 3908[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 4 for key "key656, size = 56"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 4[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key656, size = 56 on page 8, address 0x7f6b2000c5c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 13, ofs = 2787[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 6: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 7, high = 13, ofs = 1856[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 10: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 11, high = 13, ofs = 1482[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 13, high = 13, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1295 for index 13 in 8[0m
+[38;5;12m[INFO src/tests.rs:59] put 58[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key155, size = 55 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949, 3908]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 4, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 4, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 4, ofs = 3908[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 4 for key "key155, size = 55"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 4[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key155, size = 55 on page 8, address 0x7f6b2000c5c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 14, ofs = 2600[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 14, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 14, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 14, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 1108 for index 14 in 8[0m
+[38;5;12m[INFO src/tests.rs:59] put 59[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key760, size = 60 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949, 3908]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 4, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 4, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 4, ofs = 3908[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 4 for key "key760, size = 60"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 4[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key760, size = 60 on page 8, address 0x7f6b2000c5c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 15, ofs = 2600[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 7: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 8, high = 15, ofs = 1669[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 11: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 12, high = 15, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 15, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 15, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 921 for index 15 in 8[0m
+[38;5;12m[INFO src/tests.rs:59] put 60[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key861, size = 61 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949, 3908]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 4, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 4, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 4, ofs = 3908[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 4 for key "key861, size = 61"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 4[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key861, size = 61 on page 8, address 0x7f6b2000c5c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 921, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 16, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 16, ofs = 1482[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 12: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 13, high = 16, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 16, ofs = 921[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 16, high = 16, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 734 for index 16 in 8[0m
+[38;5;12m[INFO src/tests.rs:59] put 61[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key762, size = 62 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949, 3908]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 4, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 4, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 4, ofs = 3908[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 4 for key "key762, size = 62"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 4[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key762, size = 62 on page 8, address 0x7f6b2000c5c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 921, 734, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 17, ofs = 2413[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 8: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 9, high = 17, ofs = 1295[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 13: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 14, high = 17, ofs = 921[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 15: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 16, high = 17, ofs = 734[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 17, high = 17, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 17: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 547 for index 17 in 8[0m
+[38;5;12m[INFO src/tests.rs:59] put 62[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:772] get root pageno 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 4[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page:780] root page with flags 0x14[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key663, size = 63 on page 4, address 0x7f6b20005458[0m
+node_offsets: [4072, 4031, 3990, 3949, 3908]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 1, high = 4, ofs = 3990[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 2: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 3, high = 4, ofs = 3949[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 3: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 4, high = 4, ofs = 3908[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 4: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:826] following index 4 for key "key663, size = 63"[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::get_page:632] get dirty page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:841] reach leaf page 8[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::search_page_root:844] found leaf page fuck at index 4[0m
+[38;5;12m[INFO src/page.rs:293] search_node for key663, size = 63 on page 8, address 0x7f6b2000c5c8[0m
+node_offsets: [3909, 3722, 3535, 3348, 3161, 2974, 2787, 2600, 2413, 2226, 1856, 1669, 1482, 1295, 1108, 921, 734, 547, 2043]
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 0, high = 18, ofs = 2226[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 9: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 10, high = 18, ofs = 1108[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 14: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 15, high = 18, ofs = 734[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 16: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 17, high = 18, ofs = 547[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 17: Node { node_flags: NodeFlags { inner: 0 }, key: [72, 101, 97, 100, 58, 58, 97, 100, 100, 95, 110, 111, 100, 101, 58, 51, 57] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::search_node:305] low = 18, high = 18, ofs = 2043[0m
+[38;5;12m[INFO src/page.rs:308] mid_node for 18: Node { node_flags: NodeFlags { inner: 0 }, key: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }[0m
+[38;5;11m[DEBUG src/page.rs:lmdb::page::PageHead::add_node:399] set ofs 360 for index 18 in 8[0m
+[38;5;12m[INFO src/tests.rs:59] put 63[0m
+[38;5;12m[INFO src/txn.rs:377] write pageno 3 back to file[0m
+[38;5;12m[INFO src/txn.rs:377] write pageno 4 back to file[0m
+[38;5;12m[INFO src/txn.rs:377] write pageno 5 back to file[0m
+[38;5;12m[INFO src/txn.rs:377] write pageno 6 back to file[0m
+[38;5;12m[INFO src/txn.rs:377] write pageno 7 back to file[0m
+[38;5;12m[INFO src/txn.rs:377] write pageno 8 back to file[0m
+[38;5;11m[DEBUG src/mdb.rs:lmdb::mdb::Env::env_write_meta:612] write meta to file DBMetaData { db_stat: DBStat { page_size: 4096, depth: 2, branch_pages: 1, leaf_pages: 5, overflow_pages: 0, entries: 64 }, root: 4, last_page: 8, last_txn_id: 1 }[0m
+[38;5;11m[DEBUG src/txn.rs:lmdb::txn::Txn::txn_abort:400] abort transaction on root 4[0m
+test tests::test2 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

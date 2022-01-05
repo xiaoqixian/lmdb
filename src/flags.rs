@@ -6,13 +6,19 @@
   > Location        : Shanghai
   > Copyright@ https://github.com/xiaoqixian
  **********************************************/
-
+use std::fmt;
 /**
  * Flags for Pages.
  */
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct PageFlags {
     pub inner: u32
+}
+
+impl fmt::Debug for PageFlags {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::UpperHex::fmt(&self.inner, f)
+    }
 }
 
 impl PageFlags {

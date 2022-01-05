@@ -36,19 +36,19 @@ fn test1() -> Result<(), Errors> {
 
 #[test]
 fn test2() -> Result<(), Errors> {
-    //let env = prepare_env(consts::READ_WRITE | consts::CREATE);
-    let env = prepare_env(consts::READ_WRITE);
+    let env = prepare_env(consts::READ_WRITE | consts::CREATE);
+    //let env = prepare_env(consts::READ_WRITE);
     
     let mut w_txn1 = Txn::new(&env, false)?;
-    for i in 64..128 {
-        let k = if i%10 < 5 {i} else {(i/10)*10 + 14 - (i%10)};
-        let mut ks = format!("key{}{}, size = {}", rand::random::<u32>() % 10, k, k);
+    for i in 0..40960 {
+    //for i in 0..64 {
+        let mut ks = format!("key{}{}, size = {}", rand::random::<u32>() % 10, i, i);
         let key = Val {
             size: ks.as_bytes().len(),
             data: ks.as_mut_ptr()
         };
 
-        let mut vs = format!("val{}, size = {}, maybe I should attach a long meaningless words to stuff my page, maybe I should attach a long meaningless words to stuff my page", k, k);
+        let mut vs = format!("val{}, size = {}, maybe I should attach a long meaningless words to stuff my page, maybe I should attach a long meaningless words to stuff my page", i, i);
         let val = Val {
             size: vs.as_bytes().len(),
             data: vs.as_mut_ptr()
@@ -58,6 +58,7 @@ fn test2() -> Result<(), Errors> {
         info!("put {}", i);
     }
     w_txn1.txn_commit()?;
+    println!("DBMetaData: {:?}", env.get_meta().unwrap());
     Ok(())
 }
 
