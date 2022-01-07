@@ -48,6 +48,7 @@ pub struct PageHead {
  * With a parent page and one of it's child page.
  * And an index of the child page in the parent page.
  */
+#[derive(Clone, Copy)]
 pub struct PageParent {
     pub page: *mut u8,
     pub parent: *mut u8,
