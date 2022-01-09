@@ -220,6 +220,12 @@ impl PageHead {
         (lower_bound - size_of::<PageHead>()) >> 1 //because ptr index length is 2 bytes.
     }
 
+    #[inline]
+    pub fn left_space(page_ptr: *mut u8) -> usize {
+        let page_head = unsafe {&*(page_ptr as *const PageHead)};
+        page_head.page_bounds.upper_bound - page_head.page_bounds.lower_bound
+    }
+
     pub fn branch_size(page_ptr: *mut u8, index: usize) -> Result<usize, Errors> {
         assert!(!page_ptr.is_null());
         let node = Self::get_node(page_ptr, index)?;
@@ -252,7 +258,7 @@ impl PageHead {
         let num_keys = Self::num_keys(page_ptr);
         if index >= num_keys {
             error!("Node index overflow, num_keys: {}, index: {}", num_keys, index);
-            return Err(Errors::IndexOverflow(index));
+            return Err(Errors::NodeIndexOverflow(index));
         }
         let ptrs = Array::<Indext>::new(unsafe {page_ptr.offset(size_of::<PageHead>() as isize)});
         Ok(unsafe {page_ptr.offset(ptrs[index] as isize) as *const Node})
@@ -276,10 +282,6 @@ impl PageHead {
         }
     }
 
-    pub fn left_space(page_ptr: *mut u8) -> usize {
-        let page_head = unsafe {&*(page_ptr as *const PageHead)};
-        page_head.page_bounds.upper_bound - page_head.page_bounds.lower_bound
-    }
 
     /**
      * search a node in a page by a key.
@@ -349,7 +351,6 @@ impl PageHead {
      */
     pub fn add_node(page_ptr: *mut u8, key: Option<&Val>, val: Option<&Val>, pageno: Option<Pageno>, index: usize, f: NodeFlags, txn: &Txn) -> Result<(), Errors> {
         assert_ne!(val.is_none(), pageno.is_none());
-        debug!("index: {}, PageHead::is_set(P_BRANCH): {}, key.is_none(): {}", index, PageHead::is_set(page_ptr, consts::P_BRANCH), key.is_none());
         assert_eq!(index == 0 && PageHead::is_set(page_ptr, consts::P_BRANCH), key.is_none());
 
         info!("add node on page {} at index {} with key {:?}", Self::get_pageno(page_ptr), index, key);
@@ -528,5 +529,30 @@ impl DirtyPageHead {
     pub fn get_index(dpage_ptr: *mut Self) -> *mut u8 {
         assert!(!dpage_ptr.is_null());
         unsafe {(*dpage_ptr).parent}
+    }
+}
+
+impl Node {
+    /**
+     * return None if this is the first node of a branch page.
+     */
+    pub fn get_key(node_ptr: *const Node) -> Option<Val> {
+        assert!(!node_ptr.is_null());
+
+        let node_ref = unsafe {&*node_ptr};
+        if node_ref.key_size == 0 {
+            None
+        } else {
+            Some(Val {size: node_ref.key_size, data: unsafe {(node_ptr as *mut u8).offset((size_of::<Self>() + node_ref.key_size) as isize)}})
+        }
+    }
+
+    #[inline]
+    pub fn get_val(node_ptr: *const Node) -> Val {
+        assert!(!node_ptr.is_null());
+
+        let node_ref = unsafe {&*node_ptr};
+        //assert!(node_ref.node_flags.is_set(consts::LEAF_NODE));
+        Val {size: unsafe {node_ref.u.datasize}, data: unsafe {(node_ptr as *mut u8).offset((size_of::<Self>() + node_ref.key_size) as isize)}}
     }
 }

@@ -48,10 +48,14 @@ pub enum Errors {
     NoSpace(String),
     InvalidParameters(String),
     PageNotFound(crate::mdb::Pageno),
+    KeyNotFound(String),
+    CursorUninitialized,
+    NodeIndexOverflow(usize),
 
     Seldom(String), //hard to classify
 
     ///harmless errors
     EmptyFile,
     EmptyTree,
+    EOF,
 }
