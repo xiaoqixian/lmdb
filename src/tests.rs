@@ -10,6 +10,7 @@
 
 use crate::txn::{Txn, Val};
 use crate::mdb::Env;
+use crate::page::{PageHead};
 use std::sync::{Arc};
 use crate::errors::Errors;
 use super::consts;
@@ -40,9 +41,16 @@ fn test2() -> Result<(), Errors> {
     //let env = prepare_env(consts::READ_WRITE);
     
     let mut w_txn1 = Txn::new(&env, false)?;
-    for i in 0..40960 {
+    for i in 0..2048 {
     //for i in 0..64 {
-        let mut ks = format!("key{}{}, size = {}", rand::random::<u32>() % 10, i, i);
+        let mut ks = format!("key{} {}, size = {}", rand::random::<u32>() % 10, i, i);
+        //let mut ks = if i < 10 {
+            //format!("key00{}, size = {}", i, i)
+        //} else if i < 100 {
+            //format!("key0{}, size = {}", i, i)
+        //} else {
+            //format!("key{}, size = {}", i, i)
+        //};
         let key = Val {
             size: ks.as_bytes().len(),
             data: ks.as_mut_ptr()
@@ -55,7 +63,7 @@ fn test2() -> Result<(), Errors> {
         };
 
         w_txn1.txn_put(key, val, consts::OP_NONE)?;
-        info!("put {}", i);
+        info!("put {}\n", i);
     }
     w_txn1.txn_commit()?;
     println!("DBMetaData: {:?}", env.get_meta().unwrap());
@@ -78,4 +86,46 @@ fn test3() {
 
     let meta11 = crate::jump_head!(ptr, PageHead, DBMetaData);
     println!("meta1: {:?}", meta11);
+}
+
+//#[test]
+fn test4() -> Result<(), Errors> {
+    use crate::cursor::Cursor;
+
+    let env = prepare_env(consts::READ_WRITE);
+    let env_meta = env.get_meta().unwrap();
+    let entries = env_meta.get_dbstat().get_entries();
+
+    println!("env_meta: {:?}", env_meta);
+
+    let txn = Txn::new(&env, true)?;
+    let mut cursor = Cursor::new(&env);
+    let mut count: usize = 0;
+    let mut v: Vec<Val> = Vec::new();
+    cursor.init(Some(&txn))?;
+    
+    for i in 0..entries-1 {
+        let (key, val) = match cursor.next(Some(&txn)) {
+            Ok(v) => v,
+            Err(e) => {
+                println!("next at {}", count);
+                return Err(e);
+            }
+        };
+        println!("get key: {:?}", key);
+
+        if count % 100 == 0 {
+            //println!("push key: {:?}", key);
+            v.push(key);
+        }
+        count += 1;
+    }
+
+    while !v.is_empty() {
+        let key = v.pop().unwrap();
+        let val = cursor.get(&key, Some(&txn))?;
+        println!("get key/val pair: {:?}/{:?}", key, val);
+    }
+
+    Ok(())
 }

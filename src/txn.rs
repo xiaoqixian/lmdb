@@ -81,6 +81,9 @@ impl Val {
      * 
      */
     pub fn get_readable_data(&self) -> String {
+        if self.size == 0 {
+            return String::from("");
+        }
         let mut res = vec![0 as u8; self.size];
         let data_ref = unsafe {std::slice::from_raw_parts(self.data as *const _, self.size)};
         for i in 0..self.size {
@@ -273,6 +276,7 @@ impl<'a> Txn<'a> {
      *                  setted, return Err(KeyExist)
      */
     pub fn txn_put(&mut self, key: Val, val: Val, flags: OperationFlags) -> Result<(), Errors> {
+        info!("put key {:?}", key);
         if self.txn_flags.is_set(consts::READ_ONLY_TXN) {
             return Err(Errors::TryToPutInReadOnlyTxn);
         }
@@ -290,9 +294,10 @@ impl<'a> Txn<'a> {
 
         match self.env.search_page(&key, Some(&self), None, true) {
             Ok(page_parent) => {
+                info!("searched page_parent {:?}", page_parent);
                 let insert_index = match PageHead::search_node(page_parent.page, &key, self.env.cmp_func)? {
                     None => {
-                        PageHead::num_keys(page_parent.page) - 1
+                        PageHead::num_keys(page_parent.page)
                     },
                     Some((index, exact)) => {
                         if exact {

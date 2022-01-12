@@ -214,6 +214,18 @@ impl fmt::Debug for DBMetaData {
     }
 }
 
+impl DBStat {
+    pub fn get_entries(&self) -> usize {
+        self.entries
+    }
+}
+
+impl DBMetaData {
+    pub fn get_dbstat(&self) -> DBStat {
+        self.db_stat
+    }
+}
+
 impl Env<'_> {
     /**
      * create a new environment
@@ -804,26 +816,26 @@ impl Env<'_> {
         }
 
         let mut page_ptr = page_parent.page;
-        let mut i: usize = 0;
         
         while PageHead::is_set(page_ptr, consts::P_BRANCH) {
-            if key.is_none() {
-                i = 0;
+            let i = if key.is_none() {
+                0
             } else {
                 match PageHead::search_node(page_ptr, &key.unwrap(), self.cmp_func)? {
-                    None => {i = PageHead::num_keys(page_ptr) - 1},
+                    None => PageHead::num_keys(page_ptr) - 1,
                     Some((index, exact)) => {
                         if exact {
-                            i = index;
+                            index
                         } else {
-                            i = index-1;
+                            index - 1
                         }
                     }
                 }
-            }
+            };
 
             if key.is_some() {
-                debug!("following index {} for key {:?}", i, &key.unwrap().get_readable_data());
+                debug!("following index {} for key {:?}, {} keys in page", i, &key.unwrap().get_readable_data(), PageHead::num_keys(page_ptr));
+                PageHead::show_branch(page_ptr);
             }
 
             page_parent.parent = page_ptr;
@@ -856,9 +868,9 @@ impl Env<'_> {
      * splitting a page also needs a new key/val pair to be inserted into either this page
      * or it's right sigling page. Inserted page pointer and the key's index returned.
      */
-    pub fn split(&self, page: *mut u8, key: &Val, val: Option<&Val>, pageno: Option<Pageno>, index: usize, node_flags: NodeFlags, txn: &Txn) -> Result<(*mut u8, usize), Errors> {
+    pub fn split(&self, page: *mut u8, key: &Val, val: Option<&Val>, pageno: Option<Pageno>, ins_index: usize, node_flags: NodeFlags, txn: &Txn) -> Result<(*mut u8, usize), Errors> {
         assert_ne!(val.is_none(), pageno.is_none());
-        debug!("splitting page {}", PageHead::get_pageno(page));
+        info!("splitting page {} and insert key {:?} at {}", PageHead::get_pageno(page), key, ins_index);
 
         let mut dpage = back_head_mut!(page, DirtyPageHead);
         let mut ret_ptr = ptr::null_mut();
@@ -869,7 +881,7 @@ impl Env<'_> {
             let parent_ptr = self.new_page(txn, consts::P_BRANCH, 1)?;
             
             self.add_depth();
-            debug!("B+ tree depth increases 1");
+            info!("B+ tree depth increases 1");
             
             //add parent for dpage
             dpage.parent = unsafe {parent_ptr.offset(size_of::<DirtyPageHead>() as isize)};
@@ -906,51 +918,62 @@ impl Env<'_> {
 
         let num_keys = PageHead::num_keys(copy);
         let split_index = num_keys/2 + 1;
+        info!("split_index = {}", split_index);
 
         //create a seperator key and insert it into the parent page.
-        let sep_key = if split_index == index {
+        let sep_key = if split_index == ins_index {
             *key
         } else {
             let mid_node_ptr = PageHead::get_node_ptr(copy, split_index)?;
             unsafe {Val {size: (*mid_node_ptr).key_size, data: mid_node_ptr.offset(1) as *mut u8}}
         };
 
-        if PageHead::left_space(dpage.parent) < size_of::<Indext>() + size_of::<Node>() + sep_key.size {
-            //no enough space in the parent node, split the parent page.
-            //assume parent page is dirty, as normally only when we need to put a pair,
-            //then we may need to split a page, so all it's ancestor pages are dirty.
-            info!("parent {} also has no enough space", PageHead::get_pageno(dpage.parent));
-            assert!(PageHead::is_set(dpage.parent, consts::P_DIRTY));
+        /*
+         * add right sibling node, if no enough space in the parent page.
+         * parent page may need to be splitted too.
+         */
+        match PageHead::add_node(dpage.parent, Some(&sep_key), None, Some(jump_head!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno), sib_dpage.index, consts::NODE_NONE, txn) {
+            Ok(_) => {
+                debug!("add right sibling node {} at ins_index {} on {}", jump_head!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno, sib_dpage.index, PageHead::get_pageno(dpage.parent));
+            },
+            Err(Errors::NoSpace(_)) => {
+                info!("parent {} also has no enough space", PageHead::get_pageno(dpage.parent));
+                assert!(PageHead::is_set(dpage.parent, consts::P_DIRTY));
 
-            self.split(dpage.parent, &sep_key, None, Some(jump_head_mut!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno), sib_dpage.index, consts::NODE_NONE, txn)?;
+                if let Err(e) = self.split(dpage.parent, &sep_key, None, Some(jump_head_mut!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno), sib_dpage.index, consts::NODE_NONE, txn) {
+                    unsafe {dealloc(copy, layout);}
+                    return Err(e);
+                }
 
-            if dpage.parent != sib_dpage.parent && dpage.index >= PageHead::num_keys(dpage.parent) {
-                dpage.parent = sib_dpage.parent;
-                dpage.index = sib_dpage.index - 1;
+                if dpage.parent != sib_dpage.parent && dpage.index >= PageHead::num_keys(dpage.parent) {
+                    dpage.parent = sib_dpage.parent;
+                    dpage.index = sib_dpage.index - 1;
+                }
+            },
+            Err(e) => {
+                unsafe {dealloc(copy, layout);}
+                return Err(e);
             }
-
-        } else {
-            PageHead::add_node(dpage.parent, Some(&sep_key), None, Some(jump_head!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno), sib_dpage.index, consts::NODE_NONE, txn)?;
-            debug!("add right sibling node {} at index {}", jump_head!(sib_dpage_ptr, DirtyPageHead, PageHead).pageno, sib_dpage.index);
         }
 
         let mut i: usize = 0;//index in copy
         let mut k: usize = 0;//index in this page and sibling page.
         let mut ins_new = false;//is the new key is inserted.
         let is_leaf = PageHead::is_set(page, consts::P_LEAF);
+        let sib_page_ptr = unsafe {sib_dpage_ptr.offset(size_of::<DirtyPageHead>() as isize)};
 
         while i < num_keys {
             let ins_page_ptr = if i < split_index {
                 page
             } else {
                 if i == split_index {
-                    k = if i == index && ins_new {1} else {0};
+                    k = if i == ins_index && ins_new {1} else {0};
                 }
-                unsafe {sib_dpage_ptr.offset(size_of::<DirtyPageHead>() as isize)}
+                sib_page_ptr
             };
     
             //get node
-            if i == index && !ins_new {
+            if i == ins_index && !ins_new {
                 PageHead::add_node(ins_page_ptr, Some(key), val, pageno, k, consts::NODE_NONE, txn)?;
                 ins_new = true;
                 ret_index = k;
@@ -966,18 +989,34 @@ impl Env<'_> {
                     assert_ne!(data_size, 0);
                     let temp_val = Val {size: data_size, data: unsafe {temp_key.data.offset(temp_key.size as isize)}};
 
-                    PageHead::add_node(ins_page_ptr, Some(&temp_key), Some(&temp_val), None, k, node.node_flags, txn)?;
+                    if let Err(e) = PageHead::add_node(ins_page_ptr, Some(&temp_key), Some(&temp_val), None, k, node.node_flags, txn) {
+                        unsafe {dealloc(copy, layout);}
+                        return Err(e); //NoSpace error is not expected here, so we can just return it.
+                    }
                 } else {
                     if k == 0 {
-                        PageHead::add_node(ins_page_ptr, None, None, Some(unsafe {node.u.pageno}), k, node.node_flags, txn)?;
+                        if let Err(e) = PageHead::add_node(ins_page_ptr, None, None, Some(unsafe {node.u.pageno}), k, node.node_flags, txn) {
+                            unsafe {dealloc(copy, layout);}
+                            return Err(e); //NoSpace error is not expected here, so we can just return it.
+                        }
                     } else {
-                        PageHead::add_node(ins_page_ptr, Some(&temp_key), None, Some(unsafe {node.u.pageno}), k, node.node_flags, txn)?;
+                        if let Err(e) = PageHead::add_node(ins_page_ptr, Some(&temp_key), None, Some(unsafe {node.u.pageno}), k, node.node_flags, txn) {
+                            unsafe {dealloc(copy, layout);}
+                            return Err(e); //NoSpace error is not expected here, so we can just return it.
+                        }
                     }
                 }
                 i += 1;
             }
 
             k += 1;
+        }
+
+        if !ins_new {
+            if let Err(e) = PageHead::add_node(sib_page_ptr, Some(key), val, pageno, k, consts::NODE_NONE, txn) {
+                unsafe {dealloc(copy, layout);}
+                return Err(e);
+            }
         }
 
         unsafe {dealloc(copy, layout);}

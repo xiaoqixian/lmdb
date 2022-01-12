@@ -50,6 +50,7 @@ pub enum Errors {
     PageNotFound(crate::mdb::Pageno),
     KeyNotFound(String),
     CursorUninitialized,
+    CursorInitialized,
     NodeIndexOverflow(usize),
 
     Seldom(String), //hard to classify

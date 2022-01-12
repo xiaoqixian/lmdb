@@ -77,6 +77,20 @@ macro_rules! error {
     ($string: expr, $($formats: expr)*) => {}
 }
 
+#[cfg(debug_assertions)]
+#[macro_export]
+macro_rules! show_keys {
+    ($ptr: expr) => {
+        crate::page::PageHead::show_keys($ptr);
+    }
+}
+
+#[cfg(not(debug_assertions))]
+#[macro_export]
+macro_rules! show_keys {
+    ($ptr: expr) => {}
+}
+
 /**
  * jump the header of a page
  */
@@ -139,3 +153,4 @@ macro_rules! ptr_mut_ref {
         }
     }
 }
+
