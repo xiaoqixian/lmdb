@@ -876,6 +876,8 @@ impl Env<'_> {
         let mut ret_ptr = ptr::null_mut();
         let mut ret_index = std::usize::MAX;
 
+        info!("original page {} DirtyPageHead: {:?}", PageHead::get_pageno(page), dpage);
+
         //create a parent page if it's a root page.
         if dpage.parent.is_null() {
             let parent_ptr = self.new_page(txn, consts::P_BRANCH, 1)?;
@@ -890,7 +892,7 @@ impl Env<'_> {
             PageHead::add_node(dpage.parent, None, None, Some(PageHead::get_pageno(page)), 0, NodeFlags::new(0), txn)?;
 
             //update txn root
-            txn.update_root(PageHead::get_pageno(dpage.parent));
+            txn.update_root(PageHead::get_pageno(dpage.parent))?;
         }
 
         let page_size = self.env_head.as_ref().unwrap().page_size;
@@ -944,11 +946,6 @@ impl Env<'_> {
                     unsafe {dealloc(copy, layout);}
                     return Err(e);
                 }
-
-                if dpage.parent != sib_dpage.parent && dpage.index >= PageHead::num_keys(dpage.parent) {
-                    dpage.parent = sib_dpage.parent;
-                    dpage.index = sib_dpage.index - 1;
-                }
             },
             Err(e) => {
                 unsafe {dealloc(copy, layout);}
@@ -978,6 +975,20 @@ impl Env<'_> {
                 ins_new = true;
                 ret_index = k;
                 ret_ptr = ins_page_ptr;
+
+                if !is_leaf {
+                    let new_page_ptr = match self.get_page(pageno.unwrap(), Some(txn)) {
+                        Ok(p) => p,
+                        Err(e) => {
+                            unsafe {dealloc(copy, layout);}
+                            return Err(e);
+                        }
+                    };
+                    assert!(PageHead::is_set(new_page_ptr, consts::P_DIRTY));
+                    let new_dpage = back_head_mut!(new_page_ptr, DirtyPageHead);
+                    new_dpage.index = k;
+                    new_dpage.parent = ins_page_ptr;
+                }
             } else if i == num_keys {
                 break;
             } else {
@@ -1005,6 +1016,21 @@ impl Env<'_> {
                             return Err(e); //NoSpace error is not expected here, so we can just return it.
                         }
                     }
+
+                    //update child node DirtyPageHead parent field if it's dirty.
+                    let temp_page = match self.get_page(unsafe {node.u.pageno}, Some(txn)) {
+                        Ok(p) => p,
+                        Err(e) => {
+                            unsafe {dealloc(copy, layout);}
+                            return Err(e);
+                        }
+                    };
+                    if PageHead::is_set(temp_page, consts::P_DIRTY) {
+                        let temp_dirty: &mut DirtyPageHead = back_head_mut!(temp_page, DirtyPageHead);
+                        temp_dirty.parent = ins_page_ptr;
+                        temp_dirty.index = k;
+                        info!("{} change parent to {}", PageHead::get_pageno(temp_page), PageHead::get_pageno(ins_page_ptr));
+                    }
                 }
                 i += 1;
             }
@@ -1016,6 +1042,21 @@ impl Env<'_> {
             if let Err(e) = PageHead::add_node(sib_page_ptr, Some(key), val, pageno, k, consts::NODE_NONE, txn) {
                 unsafe {dealloc(copy, layout);}
                 return Err(e);
+            }
+            ret_ptr = sib_page_ptr;
+            ret_index = k;
+
+            if !is_leaf {
+                let new_page_ptr = match self.get_page(pageno.unwrap(), Some(txn)) {
+                    Ok(p) => p,
+                    Err(e) => {
+                        unsafe {dealloc(copy, layout);}
+                        return Err(e);
+                    }
+                };
+                let new_dpage = back_head_mut!(new_page_ptr, DirtyPageHead);
+                new_dpage.parent = sib_page_ptr;
+                new_dpage.index = k;
             }
         }
 

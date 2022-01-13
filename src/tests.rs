@@ -35,7 +35,7 @@ fn test1() -> Result<(), Errors> {
     Ok(())
 }
 
-#[test]
+//#[test]
 fn test2() -> Result<(), Errors> {
     let env = prepare_env(consts::READ_WRITE | consts::CREATE);
     //let env = prepare_env(consts::READ_WRITE);
@@ -88,7 +88,7 @@ fn test3() {
     println!("meta1: {:?}", meta11);
 }
 
-//#[test]
+#[test]
 fn test4() -> Result<(), Errors> {
     use crate::cursor::Cursor;
 
@@ -112,10 +112,10 @@ fn test4() -> Result<(), Errors> {
                 return Err(e);
             }
         };
-        println!("get key: {:?}", key);
+        //println!("get key: {:?}", key);
 
         if count % 100 == 0 {
-            //println!("push key: {:?}", key);
+            println!("push key: {:?}", key);
             v.push(key);
         }
         count += 1;

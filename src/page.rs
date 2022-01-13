@@ -129,15 +129,21 @@ impl fmt::Debug for Node {
 
 impl fmt::Debug for PageParent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = if self.page.is_null() {
+        let page_s = if self.page.is_null() {
             String::from("null")
         } else {
             format!("{}", PageHead::get_pageno(self.page))
         };
 
+        let parent_s = if self.parent.is_null() {
+            String::from("null")
+        } else {
+            format!("{}", PageHead::get_pageno(self.parent))
+        };
+
         f.debug_struct("PageParent")
-            .field("page", &s)
-            .field("parent", &PageHead::get_pageno(self.parent))
+            .field("page", &page_s)
+            .field("parent", &parent_s)
             .field("index", &self.index)
             .finish()
     }
@@ -320,7 +326,10 @@ impl PageHead {
      * show all child pageno in a branch page
      */
     pub fn show_branch(page_ptr: *mut u8) {
-        assert!(Self::is_set(page_ptr, consts::P_BRANCH));
+        if !Self::is_set(page_ptr, consts::P_BRANCH) {
+            println!("{} not a branch page", Self::get_pageno(page_ptr));
+            return;
+        }
 
         let num_keys = Self::num_keys(page_ptr);
         print!("child page in {}: ", Self::get_pageno(page_ptr));
@@ -442,6 +451,7 @@ impl PageHead {
         let is_branch = Self::is_set(page_ptr, consts::P_BRANCH);
         while i > index {
             node_offsets[i] = node_offsets[i-1];
+            
             //update dirty pages' DirtyPageHead.index if it's a branch page
             if is_branch {
                 let i_node_ref = unsafe {&*(page_ptr.offset(node_offsets[i] as isize) as *const Node)};
