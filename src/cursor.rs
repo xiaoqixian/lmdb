@@ -9,14 +9,15 @@
 
 //use std::ptr::{NonNull};
 use std::fmt;
-use std::sync::{Arc};
+use std::sync::Arc;
 use std::ptr;
 
-use crate::page::{PageHead, DirtyPageHead, Node, PageParent};
+use crate::page::{PageHead, Node, PageParent};
 use crate::mdb::Env;
 use crate::txn::{Txn, Val};
 use crate::errors::Errors;
 use crate::consts;
+use crate::flags;
 use crate::{info, debug, show_keys};
 
 /**
@@ -94,7 +95,7 @@ impl<'a> Cursor<'a> {
 
         page_parent.index = 0;
         while true {
-            if PageHead::is_set(page_parent.page, consts::P_LEAF) {
+            if PageHead::is_set(page_parent.page, flags::P_LEAF) {
                 page_parent.parent = page_parent.page;
                 page_parent.page = ptr::null_mut();
                 page_parent.index = 0;
@@ -156,7 +157,7 @@ impl<'a> Cursor<'a> {
             }
         };
 
-        while PageHead::is_set(page_ptr, consts::P_BRANCH) {
+        while PageHead::is_set(page_ptr, flags::P_BRANCH) {
             //PageHead::show_keys(page_ptr)?;
             let index = match PageHead::search_node(page_ptr, key, self.env.cmp_func)? {
                 None => { //key is greater than all keys in the page.
@@ -181,7 +182,7 @@ impl<'a> Cursor<'a> {
             page_ptr = child;
         }
 
-        assert!(PageHead::is_set(page_ptr, consts::P_LEAF));
+        assert!(PageHead::is_set(page_ptr, flags::P_LEAF));
         //PageHead::show_keys(page_ptr)?;
 
         let index = match PageHead::search_node(page_ptr, key, self.env.cmp_func)? {
@@ -242,14 +243,14 @@ impl<'a> Cursor<'a> {
                 self.path.push(page_parent);
                 page_parent.index = 0;
             
-                while PageHead::is_set(page_parent.page, consts::P_BRANCH) {
+                while PageHead::is_set(page_parent.page, flags::P_BRANCH) {
                     page_parent.parent = page_parent.page;
                     page_parent.page = self.env.get_page(unsafe {PageHead::get_node(page_parent.page, page_parent.index)?.u.pageno}, txn)?;
                     debug!("get {} first child {}", PageHead::get_pageno(page_parent.parent), PageHead::get_pageno(page_parent.page));
                     self.path.push(page_parent);
                 }
 
-                assert!(PageHead::is_set(page_parent.page, consts::P_LEAF));
+                assert!(PageHead::is_set(page_parent.page, flags::P_LEAF));
                 page_parent.parent = page_parent.page;
                 page_parent.page = ptr::null_mut();
                 self.path.push(page_parent);

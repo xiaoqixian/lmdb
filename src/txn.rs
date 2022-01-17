@@ -23,7 +23,7 @@ use crate::errors::Errors;
 use crate::mdb::{Env, Pageno};
 use crate::page::{PageHead, DirtyPageHead};
 use crate::{debug, jump_head_ptr, jump_head, error, info, jump_head_mut, ptr_ref};
-use crate::flags::{TxnFlags, NodeFlags, OperationFlags};
+use crate::flags::{self, TxnFlag, NodeFlag, OperationFlag};
 
 #[derive(Copy, Clone)]
 pub struct Val {
@@ -52,7 +52,7 @@ pub struct Txn<'a> {
     pub env: Arc<Env<'a>>,
     write_lock: Option<MutexGuard<'a, i32>>,
     u: RefCell<unit>, //if a write transaction, it's dirty_queue; if a read transaction, it's Reader
-    txn_flags: TxnFlags
+    txn_flags: TxnFlag
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -112,7 +112,7 @@ impl std::fmt::Debug for Txn<'_> {
             .field("env", &self.env)
             .field("write_lock", &self.write_lock)
             .field("u", &unsafe {
-                if self.txn_flags.is_set(consts::READ_ONLY_TXN) {
+                if self.txn_flags.is_set(flags::READ_ONLY_TXN) {
                     format!("{:?}", self.u.borrow().reader)
                 } else {
                     String::from("dirty_queue")
@@ -175,7 +175,7 @@ impl<'a> Txn<'a> {
                 u: RefCell::new(unit {
                     dirty_queue: mem::ManuallyDrop::new(VecDeque::new())
                 }),
-                txn_flags: TxnFlags::new(0)
+                txn_flags: TxnFlag::new(0)
             };
 
             env.set_w_txn_first_page(txn.txn_first_pgno);
@@ -204,7 +204,7 @@ impl<'a> Txn<'a> {
                 u: RefCell::new(unit {
                     reader,
                 }),
-                txn_flags: consts::READ_ONLY_TXN,
+                txn_flags: flags::READ_ONLY_TXN,
             };
 
             debug!("begin a read only transaction {} on root {}", txn.txn_id, *txn.txn_root.borrow());
@@ -233,7 +233,7 @@ impl<'a> Txn<'a> {
     }
 
     #[inline]
-    pub fn get_txn_flags(&self) -> TxnFlags {
+    pub fn get_txn_flags(&self) -> TxnFlag {
         self.txn_flags
     }
 
@@ -275,9 +275,9 @@ impl<'a> Txn<'a> {
      *      K_OVERRITE: allow key overrite if key exists, if key exists and this flag not
      *                  setted, return Err(KeyExist)
      */
-    pub fn txn_put(&mut self, key: Val, val: Val, flags: OperationFlags) -> Result<(), Errors> {
+    pub fn txn_put(&mut self, key: Val, val: Val, flags: OperationFlag) -> Result<(), Errors> {
         info!("put key {:?}", key);
-        if self.txn_flags.is_set(consts::READ_ONLY_TXN) {
+        if self.txn_flags.is_set(flags::READ_ONLY_TXN) {
             return Err(Errors::TryToPutInReadOnlyTxn);
         }
 
@@ -301,7 +301,7 @@ impl<'a> Txn<'a> {
                     },
                     Some((index, exact)) => {
                         if exact {
-                            if !flags.is_set(consts::K_OVERRITE) {
+                            if !flags.is_set(flags::K_OVERRITE) {
                                 error!("KeyExist: {:?}", &key);
                                 return Err(Errors::KeyExist(format!("{:?}", &key)));
                             }
@@ -311,13 +311,13 @@ impl<'a> Txn<'a> {
                     }
                 };
 
-                match PageHead::add_node(page_parent.page, Some(&key), Some(&val), None, insert_index, consts::NODE_NONE, &self) {
+                match PageHead::add_node(page_parent.page, Some(&key), Some(&val), None, insert_index, flags::NODE_NONE, &self) {
                     Ok(_) => {},
                     Err(Errors::NoSpace(s)) => {
                         debug!("add node no space");
                         //need to split the page.
                         //page spliting also support inserting a new node.
-                        self.env.split(page_parent.page, &key, Some(&val), None, insert_index, consts::NODE_NONE, &self)?;
+                        self.env.split(page_parent.page, &key, Some(&val), None, insert_index, flags::NODE_NONE, &self)?;
                     },
                     Err(e) => {
                         return Err(e);
@@ -326,8 +326,8 @@ impl<'a> Txn<'a> {
             },
             Err(Errors::EmptyTree) => {
                 debug!("allocating a new root page");
-                let root_ptr = self.env.new_page(&self, consts::P_LEAF, 1)?;
-                PageHead::add_node(jump_head_ptr!(root_ptr, DirtyPageHead), Some(&key), Some(&val), None, 0, consts::NODE_NONE, &self)?;
+                let root_ptr = self.env.new_page(&self, flags::P_LEAF, 1)?;
+                PageHead::add_node(jump_head_ptr!(root_ptr, DirtyPageHead), Some(&key), Some(&val), None, 0, flags::NODE_NONE, &self)?;
                 self.env.add_depth();
                 self.txn_root.replace(jump_head!(root_ptr, DirtyPageHead, PageHead).pageno);
                 debug!("new txn_root: {}", *self.txn_root.borrow());
@@ -348,7 +348,7 @@ impl<'a> Txn<'a> {
      * 2. flush mmap
      */
     pub fn txn_commit(&mut self) -> Result<(), Errors> {
-        if self.txn_flags.is_set(consts::READ_ONLY_TXN) {
+        if self.txn_flags.is_set(flags::READ_ONLY_TXN) {
             return Err(Errors::ReadOnlyTxnNotAllowed);
         }
 
@@ -366,9 +366,9 @@ impl<'a> Txn<'a> {
                 let dpage = ptr_ref!(ptr, DirtyPageHead);
                 let ph: &mut PageHead = jump_head_mut!(ptr, DirtyPageHead, PageHead);
 
-                assert!(ph.page_flags.is_set(consts::P_DIRTY));
-                ph.page_flags ^= consts::P_DIRTY;
-                assert!(!ph.page_flags.is_set(consts::P_DIRTY));
+                assert!(ph.page_flags.is_set(flags::P_DIRTY));
+                ph.page_flags ^= flags::P_DIRTY;
+                assert!(!ph.page_flags.is_set(flags::P_DIRTY));
                 
                 let buf = unsafe {std::slice::from_raw_parts(ptr.offset(size_of::<DirtyPageHead>() as isize), self.env.get_page_size())};
                 let ofs = ph.pageno as u64 * self.env.get_page_size() as u64;
@@ -404,7 +404,7 @@ impl<'a> Txn<'a> {
     pub fn txn_abort(&mut self) -> Result<(), Errors> {
         debug!("abort transaction on root {}", self.txn_root.borrow());
 
-        if self.txn_flags.is_set(consts::READ_ONLY_TXN) {
+        if self.txn_flags.is_set(flags::READ_ONLY_TXN) {
             self.env.del_reader(unsafe {self.u.borrow().reader})?;
         } else {
             let dq = unsafe {
